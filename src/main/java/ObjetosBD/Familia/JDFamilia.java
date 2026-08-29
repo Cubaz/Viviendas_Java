@@ -1,4 +1,6 @@
-package ObjetosBD;
+package ObjetosBD.Familia;
+
+import ObjetosBD.Conexion;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -15,15 +17,14 @@ public class JDFamilia {
             int filas = ps.executeUpdate(); ///EJECUTA EL INSERT
 
             /// OBTIENE EL ID RECIÉN GENERADO DE FAMILIA
-            if(filas >0){
-                var rs=ps.getGeneratedKeys();
-                if(rs.next()){
+            if(filas >0) {
+                var rs = ps.getGeneratedKeys();
+                if (rs.next()) {
                     int idGenerado = rs.getInt(1);
                     System.out.println("REGISTRO DE FAMILIA EXITOSO");
-                    System.out.println("SU ID DE FAMILIA ES "+ idGenerado);
+                    System.out.println("SU ID DE FAMILIA ES " + idGenerado);
                 }
             }
-
         } catch (SQLException e) {
             System.out.println("Error al insertar familia" + e.getMessage());
         }
