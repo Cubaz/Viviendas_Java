@@ -16,7 +16,7 @@ public class Conexion {
     private static final String PASS = "admin";
 
     //private static final String PASS = "root";
-    private static final String URL = "jdbc:mysql://localhost:3306/" + BD + "?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:3306/" + BD + "?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
 
 
     public Conexion(){
