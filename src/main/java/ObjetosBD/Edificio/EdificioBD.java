@@ -1,0 +1,13 @@
+package ObjetosBD.Edificio;
+
+public class EdificioBD {
+
+    private int IdEdificio;
+    private String nombre;
+
+    public int getIdEdificio(){ return IdEdificio;}
+    public void setIdEdificio(int IdEdificio) {this.IdEdificio = IdEdificio;}
+
+    public String getNombre(){ return nombre;}
+    public void setNombre(String nombre){this.nombre = nombre;}
+}

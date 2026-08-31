@@ -31,6 +31,7 @@ public class ColoniaController {
         int id = CDB.insertarColonia(nombre);
         if(id!=-1){
             System.out.println("Registro exitoso \\\\nID de usuario:" + id);
+            nom_col.clear();
         }else{
             System.out.println("Error en el registro de COLONIA");
         }

@@ -39,7 +39,8 @@ public class FamiliaController {
         int id= FDB.insertarFamilia(apellidos);
         if(id != -1){
             System.out.println("Registro exitoso \\nID de usuario:" + id);
-
+            ap_p.clear();
+            ap_m.clear();
         }else{
             System.out.println("Error en el registro de FAMILIA");
         }
