@@ -10,7 +10,7 @@ public class JDEdificio {
     private Conexion CN = new Conexion();
 
     public int insertarEdificio(String nombre){
-        String sql = "INSERT INTO edificio(nombre) VALUES (?)";
+        String sql = "INSERT INTO edificio(edi_nombre) VALUES (?)";
         try(PreparedStatement ps = CN.getConexion().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             ps.setString(1, nombre);
             int filas = ps.executeUpdate();

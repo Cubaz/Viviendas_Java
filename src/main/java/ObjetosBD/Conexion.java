@@ -8,9 +8,7 @@ public class Conexion {
 
     private static Connection cnx;
     private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
-    //La mía se llama vivienda -Said (perdon prometo que no hago esto a proposito, solo quiero que ya funcione xd)
-    private static final String BD = "vivienda";
-    //private static final String BD = "viviendas";
+    private static final String BD = "viviendas";
     private static final String USER = "root";
     //Cambios de Said (prometo que sin esto no corría xd)
     private static final String PASS = "admin";

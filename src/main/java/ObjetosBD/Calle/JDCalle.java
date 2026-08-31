@@ -10,7 +10,7 @@ public class JDCalle {
     private Conexion CN = new Conexion();
 
     public int insertarCalle(String nombreCalle, int IdColonia){
-        String sql = "INSERT INTO calle (nombreCalle, IdColonia) VALUES(?, ?)";
+        String sql = "INSERT INTO calle (cal_nombre, id_colonia) VALUES(?, ?)";
 
         try (PreparedStatement ps = CN.getConexion().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             ps.setString(1, nombreCalle);
