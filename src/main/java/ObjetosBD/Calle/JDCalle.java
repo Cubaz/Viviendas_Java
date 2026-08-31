@@ -1,8 +1,12 @@
 package ObjetosBD.Calle;
 
 import ObjetosBD.Conexion;
+import ObjetosBD.Edificio.EdificioBD;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -30,5 +34,25 @@ public class JDCalle {
             System.out.println("Error al insertar calle: " + e.getMessage());
         }
         return -1;
+    }
+
+    public ObservableList<CalleBD> obtenerCalle() {
+        ObservableList<CalleBD> lista = FXCollections.observableArrayList();
+        String sql = "SELECT * FROM calle";
+
+        try (PreparedStatement ps = CN.getConexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id_calle");
+                String nombre = rs.getString("cal_nombre");
+                int idColonia = rs.getInt("id_colonia");
+
+                lista.add(new CalleBD(id, nombre, idColonia));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener calles: " + e.getMessage());
+        }
+        return lista;
     }
 }
