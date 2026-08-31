@@ -1,6 +1,4 @@
-package ObjetosBD;
-
-import java.util.*;
+package ObjetosBD.Familia;
 
 public class FamiliaBD {
 

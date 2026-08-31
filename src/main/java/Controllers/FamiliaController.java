@@ -2,7 +2,8 @@ package Controllers;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
-import ObjetosBD.JDFamilia;
+import ObjetosBD.Familia.JDFamilia;
+
 
 
 public class FamiliaController {
