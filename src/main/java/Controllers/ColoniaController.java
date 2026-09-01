@@ -36,6 +36,4 @@ public class ColoniaController {
             System.out.println("Error en el registro de COLONIA");
         }
     }
-
-
 }

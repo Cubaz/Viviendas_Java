@@ -5,6 +5,12 @@ public class CalleBD {
     private String nombre;
     private int id_colonia;
 
+    public CalleBD(int idCalle, String nombre, int idColonia){
+        this.id_calle = idCalle;
+        this.nombre = nombre;
+        this.id_colonia = idColonia;
+    }
+
     public int getId_calle(){return id_calle;}
     public void setId_calle(int id_calle){this.id_calle = id_calle;}
 
