@@ -10,7 +10,7 @@ public class JDPersona {
     private Conexion CN = new Conexion();
 
     public int insertarPersona(String nombrePersona, int IdFamilia, int edad){
-        String sql = "INSERT INTO persona(Nombre, IdFamilia, edadPersona) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO persona(per_nombre, id_familia, per_edad) VALUES (?, ?, ?)";
 
         try (PreparedStatement ps = CN.getConexion().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             ps.setString(1, nombrePersona);
