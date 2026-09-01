@@ -26,6 +26,7 @@ public class JDVivienda {
                     int idGenerado = rs.getInt(1);
                     System.out.println("REGISTRO DE VIVIENDA EXITOSO");
                     System.out.println("Su ID de vivienda es" + idGenerado);
+                    return idGenerado;
                 }
             }
 

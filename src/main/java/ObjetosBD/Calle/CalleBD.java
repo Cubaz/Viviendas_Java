@@ -19,4 +19,9 @@ public class CalleBD {
 
     public int getId_colonia(){return id_colonia;}
     public void setId_colonia(int id_colonia){this.id_colonia = id_colonia;}
+
+    @Override
+    public String toString() {
+        return nombre; // 👈 Esto hará que el ComboBox muestre el nombre de la calle
+    }
 }

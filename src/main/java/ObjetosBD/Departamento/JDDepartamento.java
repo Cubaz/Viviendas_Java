@@ -22,6 +22,7 @@ public class JDDepartamento {
                     int idGenerado = rs.getInt(1);
                     System.out.println("REGISTRO DE DEPARTAMENTO EXITOSO");
                     System.out.println("Su ID de departamento es" + idGenerado);
+                    return idGenerado;
                 }
             }
 

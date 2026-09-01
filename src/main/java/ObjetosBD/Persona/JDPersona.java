@@ -1,8 +1,12 @@
 package ObjetosBD.Persona;
 
 import ObjetosBD.Conexion;
+import ObjetosBD.Edificio.EdificioBD;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -32,5 +36,26 @@ public class JDPersona {
             System.out.println("Error al insertar persona: " + e.getMessage());
         }
         return -1;
+    }
+
+    public ObservableList<PersonaBD> obtenerPersona() {
+        ObservableList<PersonaBD> lista = FXCollections.observableArrayList();
+        String sql = "SELECT * FROM persona";
+
+        try (PreparedStatement ps = CN.getConexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id_persona");
+                String nombre = rs.getString("per_nombre");
+                int familia = rs.getInt("id_familia");
+                int edad = rs.getInt("per_edad");
+
+                lista.add(new PersonaBD(id, nombre, familia, edad));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener persona: " + e.getMessage());
+        }
+        return lista;
     }
 }
