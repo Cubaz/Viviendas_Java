@@ -12,7 +12,7 @@ public class JDColonia {
     private Conexion CN = new Conexion();
 
     public int insertarColonia(String nombre){
-        String sql = "INSERT INTO colonia (nombre) VALUES (?)";
+        String sql = "INSERT INTO colonia (col_nombre) VALUES (?)";
         try(PreparedStatement ps=CN.getConexion().prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)){
             ps.setString(1,nombre);
             int filas = ps.executeUpdate();
@@ -41,7 +41,7 @@ public class JDColonia {
             while (rs.next()) {
                 // Ajusta 'id_colonia' y 'Nombre' según los nombres exactos en tu MySQL
                 int id = rs.getInt("id_colonia");
-                String nombre = rs.getString("Nombre");
+                String nombre = rs.getString("col_nombre");
 
                 lista.add(new ColoniaBD(id, nombre));
             }

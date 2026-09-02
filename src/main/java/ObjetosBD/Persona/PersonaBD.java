@@ -26,4 +26,9 @@ public class PersonaBD {
     public int getEdadPersona(){return edadPersona;}
     public void setEdadPersona(int edadPersona){this.edadPersona = edadPersona;}
 
+    @Override
+    public String toString() {
+        return Nombre;
+    }
+
 }
