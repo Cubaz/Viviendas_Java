@@ -58,4 +58,26 @@ public class JDPersona {
         }
         return lista;
     }
+
+    public PersonaBD obtenerPersona(int idPersona) {
+        PersonaBD persona = null;
+        String sql = "SELECT * FROM persona WHERE id_persona = " + idPersona;
+
+        try (PreparedStatement ps = CN.getConexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id_persona");
+                String nombre = rs.getString("per_nombre");
+                int familia = rs.getInt("id_familia");
+                int edad = rs.getInt("per_edad");
+
+                persona = new PersonaBD(id, nombre, familia, edad);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener persona: " + e.getMessage());
+        }
+
+        return persona;
+    }
 }

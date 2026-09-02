@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>Hospital</artifactId>
+    <artifactId>Vivienda</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>Hospital</name>
+    <name>Vivienda</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,6 +25,11 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
+            <version>21.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
             <version>21.0.6</version>
         </dependency>
         <dependency>
@@ -114,7 +119,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>org.example.hospital/org.example.hospital.HelloApplication</mainClass>
+                    <mainClass>Applications.Inicio</mainClass>
                 </configuration>
             </plugin>
         </plugins>

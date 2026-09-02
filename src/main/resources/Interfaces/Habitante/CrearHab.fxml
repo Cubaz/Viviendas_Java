@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="673.0" prefWidth="900.0" style="-fx-background-color: #cc3a63;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.HabitanteController">
+   <children>
+      <Text fill="#f9f0e0" layoutX="194.0" layoutY="63.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ASIGNAR VIVIENDA">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="58.0" />
+         </font>
+      </Text>
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ab8174" height="565.0" layoutX="41.0" layoutY="81.0" stroke="TRANSPARENT" strokeType="INSIDE" style="-fx-arc-width: 30; -fx-arc-height: 30; -fx-opacity: 0.50;" width="819.0">
+         <effect>
+            <DropShadow>
+               <color>
+                  <Color red="0.19736842811107635" green="0.012792397290468216" blue="0.012792397290468216" opacity="0.30000001192092896" />
+               </color>
+            </DropShadow>
+         </effect>
+      </Rectangle>
+      <Text fx:id="txt_idPersona" fill="#f9f0e0" layoutX="306.0" layoutY="230.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Id de la persona:">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <TextField fx:id="in_idPersonaRegistro" layoutX="481.0" layoutY="203.0" prefHeight="40.0" prefWidth="106.0">
+         <font>
+            <Font name="CocogooseProTrial Light" size="19.0" />
+         </font>
+      </TextField>
+      <Text fx:id="txt_idVivienda" fill="#f9f0e0" layoutX="308.0" layoutY="315.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Id de la vivienda:">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <TextField fx:id="in_idViviendaRegistro" layoutX="483.0" layoutY="288.0" prefHeight="40.0" prefWidth="106.0">
+         <font>
+            <Font name="CocogooseProTrial Light" size="19.0" />
+         </font>
+      </TextField>
+      <Text fx:id="txt_rol" fill="#f9f0e0" layoutX="307.0" layoutY="398.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Rol:">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <ComboBox fx:id="in_comboRol" layoutX="363.0" layoutY="378.0" prefHeight="26.0" prefWidth="226.0" />
+      <Button fx:id="btn_preguntarAsignar" layoutX="302.0" layoutY="462.0" mnemonicParsing="false" onAction="#preguntarAsignar" prefHeight="76.0" prefWidth="300.0" style="-fx-background-color: #FFF7EB;" text="ASIGNAR" textFill="#540707">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="23.0" />
+         </font>
+      </Button>
+      <Text fx:id="txt_datosPersona" fill="#f9f0e0" layoutX="113.0" layoutY="156.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-weight: 3;" text="DATOS DE LA PERSONA" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <Separator fx:id="separadorPersona" layoutX="114.0" layoutY="167.0" prefHeight="0.0" prefWidth="672.0" visible="false" />
+      <Text fx:id="txt_nombrePerRegistro" fill="#f9f0e0" layoutX="113.0" layoutY="220.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nombre de la persona:" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <TextField fx:id="out_nombrePerRegistro" disable="true" editable="false" layoutX="341.0" layoutY="193.0" prefHeight="41.0" prefWidth="384.0" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Light" size="19.0" />
+         </font>
+      </TextField>
+      <Text fx:id="txt_rolRegistro" fill="#f9f0e0" layoutX="114.0" layoutY="282.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Rol:" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <TextField fx:id="out_rolRegistro" disable="true" editable="false" layoutX="173.0" layoutY="255.0" prefHeight="42.0" prefWidth="258.0" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Light" size="19.0" />
+         </font>
+      </TextField>
+      <Text fx:id="txt_datosVivienda" fill="#f9f0e0" layoutX="112.0" layoutY="360.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-weight: 3;" text="DATOS DE LA VIVIENDA" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <Separator fx:id="separadorVivienda" layoutX="113.0" layoutY="371.0" prefHeight="0.0" prefWidth="672.0" visible="false" />
+      <Text fx:id="txt_nombreCalRegistro" fill="#f9f0e0" layoutX="113.0" layoutY="425.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Calle:" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <TextField fx:id="out_nombreCalRegistro" disable="true" editable="false" layoutX="187.0" layoutY="398.0" prefHeight="40.0" prefWidth="324.0" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Light" size="19.0" />
+         </font>
+      </TextField>
+      <Text fx:id="txt_tipoVivRegistro" fill="#f9f0e0" layoutX="112.0" layoutY="486.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Tipo de vivienda:" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <TextField fx:id="out_tipoVivRegistro" disable="true" editable="false" layoutX="297.0" layoutY="459.0" prefHeight="40.0" prefWidth="213.0" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Light" size="19.0" />
+         </font>
+      </TextField>
+      <Text fx:id="txt_numExtRegistro" fill="#f9f0e0" layoutX="548.0" layoutY="425.0" strokeType="OUTSIDE" strokeWidth="0.0" text="N. Exterior:" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <TextField fx:id="out_numExtRegistro" disable="true" editable="false" layoutX="670.0" layoutY="398.0" prefHeight="40.0" prefWidth="96.0" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Light" size="19.0" />
+         </font>
+      </TextField>
+      <Text fx:id="txt_numIntRegistro" fill="#f9f0e0" layoutX="548.0" layoutY="486.0" strokeType="OUTSIDE" strokeWidth="0.0" text="N. Interior:" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <TextField fx:id="out_numIntRegistro" disable="true" editable="false" layoutX="670.0" layoutY="459.0" prefHeight="40.0" prefWidth="96.0" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Light" size="19.0" />
+         </font>
+      </TextField>
+      <Button fx:id="btn_cancelarAsignar" disable="true" layoutX="63.0" layoutY="581.0" mnemonicParsing="false" onAction="#cancelarAsignar" prefHeight="50.0" prefWidth="146.0" style="-fx-background-color: #FFF7EB;" text="REGRESAR" textFill="#540707" underline="true" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="23.0" />
+         </font>
+      </Button>
+      <Button fx:id="btn_confirmarAsignar" disable="true" layoutX="224.0" layoutY="581.0" mnemonicParsing="false" onAction="#asignarHabitante" prefHeight="50.0" prefWidth="166.0" style="-fx-background-color: #FFF7EB;" text="CONFIRMAR" textFill="#540707" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="23.0" />
+         </font>
+      </Button>
+      <Text fx:id="txt_confirmacion" fill="YELLOW" layoutX="456.0" layoutY="613.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Confirme que los datos sean correctos" textAlignment="JUSTIFY" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="20.0" />
+         </font>
+      </Text>
+      <Button fx:id="btn_asignarOtra" disable="true" layoutX="113.0" layoutY="255.0" mnemonicParsing="false" onAction="#asignarOtraVivienda" prefHeight="76.0" prefWidth="300.0" style="-fx-background-color: #FFF7EB;" text="ASIGNAR OTRA VIVIENDA" textFill="#540707" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="23.0" />
+         </font>
+      </Button>
+      <Button fx:id="btn_volverInicio" disable="true" layoutX="483.0" layoutY="255.0" mnemonicParsing="false" onAction="#volverInicio" prefHeight="76.0" prefWidth="300.0" style="-fx-background-color: #FFF7EB;" text="VOLVER A INICIO" textFill="#540707" visible="false">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="23.0" />
+         </font>
+      </Button>
+      <StackPane layoutY="93.0" prefHeight="84.0" prefWidth="900.0">
+         <children>
+            <Text fx:id="out_infoOperacion" fill="YELLOW" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER">
+               <font>
+                  <Font size="26.0" />
+               </font>
+            </Text>
+         </children>
+      </StackPane>
+   </children>
+</AnchorPane>

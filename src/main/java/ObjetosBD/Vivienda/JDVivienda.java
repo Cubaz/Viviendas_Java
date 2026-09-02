@@ -1,9 +1,9 @@
 package ObjetosBD.Vivienda;
 
 import ObjetosBD.Conexion;
-
 import java.awt.desktop.SystemSleepEvent;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -36,6 +36,29 @@ public class JDVivienda {
         return -1;
     }
 
+    public ViviendaBD obtenerVivienda(int idVivienda) {
+        ViviendaBD vivienda = null;
+        String sql = "SELECT * FROM vivienda WHERE id_vivienda = " + idVivienda;
 
+        try (PreparedStatement ps = CN.getConexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id_vivienda");
+                String tipo = rs.getString("viv_tipo");
+                int habitantes = rs.getInt("viv_habitantes");
+                int exte = rs.getInt("viv_numExt");
+                int inte = rs.getInt("viv_numInt");
+                int id_calle = rs.getInt("id_calle");
+                int mts_cuadrados = rs.getInt("viv_mtscuadrados");
+
+                vivienda = new ViviendaBD(id, tipo, habitantes, exte, inte, id_calle, mts_cuadrados);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener persona: " + e.getMessage());
+        }
+
+        return vivienda;
+    }
 
 }

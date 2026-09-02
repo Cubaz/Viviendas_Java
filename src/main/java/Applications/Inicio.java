@@ -14,7 +14,7 @@ public class Inicio extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/Vivienda.fxml")); ///ABRE LA VISTA DE LA PORTADA DEL PROYECTO
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/Habitante/CrearHab.fxml")); ///ABRE LA VISTA DE LA PORTADA DEL PROYECTO
 
         ///  LAS SIGUIENTES FUNCIONES SON LAS QUE INICIALIZAN LA VISTA DE LA PORTADA Y LA MUESTRAN EN LA PANTALLA
         AnchorPane pane = loader.load();
@@ -24,7 +24,7 @@ public class Inicio extends Application {
         stage.show();
     }
 
-    static void main(String[] args) {
-        launch();
+    public static void main(String[] args) {
+        launch(args);
     }
 }

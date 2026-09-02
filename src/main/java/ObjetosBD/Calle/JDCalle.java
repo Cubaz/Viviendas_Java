@@ -55,4 +55,25 @@ public class JDCalle {
         }
         return lista;
     }
+
+    public CalleBD obtenerCalle(int idCalle) {
+        CalleBD calle = null;
+        String sql = "SELECT * FROM calle";
+
+        try (PreparedStatement ps = CN.getConexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id_calle");
+                String nombre = rs.getString("cal_nombre");
+                int idColonia = rs.getInt("id_colonia");
+
+                calle = new CalleBD(id, nombre, idColonia);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener calles: " + e.getMessage());
+        }
+
+        return calle;
+    }
 }
