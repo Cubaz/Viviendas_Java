@@ -8,16 +8,21 @@ import ObjetosBD.Persona.JDPersona;
 import ObjetosBD.Persona.PersonaBD;
 import ObjetosBD.Vivienda.JDVivienda;
 import ObjetosBD.Vivienda.ViviendaBD;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.scene.paint.Color;
 
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Map;
+
 public class HabitanteController {
+    //JavaFX - Crear habitante
     @FXML private Button btn_cancelarAsignar;
     @FXML private Button btn_confirmarAsignar;
     @FXML private Button btn_preguntarAsignar;
@@ -50,18 +55,38 @@ public class HabitanteController {
     @FXML private Text txt_numIntRegistro;
     @FXML private Text txt_confirmacion;
 
-    private final Color colorAdvertencia = new Color(1.0, 1.0, 0.0, 1.0);
-    private final Color colorExito = new Color(0.0, 1.0, 0.1529, 1.0);
+    //JavaFX - Busqueda de habitantes
+    @FXML private Button btn_buscar;
+    @FXML private Button btn_buscarOtro;
+    @FXML private AnchorPane pane_entradaBusqueda;
+    @FXML private AnchorPane pane_tablaBusqueda;
+    @FXML private TableView<Map<String, Object>> tabla_busquedaHabitante;
+    @FXML private TableColumn<Map<String, Object>, Object> colIdPersona;
+    @FXML private TableColumn<Map<String, Object>, Object> colNombre;
+    @FXML private TableColumn<Map<String, Object>, Object> colRol;
+    @FXML private TableColumn<Map<String, Object>, Object> colIdVivienda;
+    @FXML private TableColumn<Map<String, Object>, Object> colTipoVivienda;
+    @FXML private TableColumn<Map<String, Object>, Object> colNoExt;
+    @FXML private TableColumn<Map<String, Object>, Object> colNoInt;
+    @FXML private TableColumn<Map<String, Object>, Object> colMetrosCuadrados;
+    @FXML private TableColumn<Map<String, Object>, Object> colIdCalle;
+    @FXML private TableColumn<Map<String, Object>, Object> colNombreCalle;
+
+    private final Color colorAdvertencia = new Color(1.0f, 1.0f, 0.0f, 1.0f);
+    private final Color colorExito = new Color(0.0f, 1.0f, 0.1529f, 1.0f);
+    private final Color colorBlanco = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+    private String mensajeOperacion;
 
     private PersonaBD personaBD;
     private ViviendaBD viviendaBD;
     private CalleBD calleBD;
     private HabitanteBD habitanteBD;
+    private ArrayList<HabitanteBD> habitantesBD;
     
-    private JDHabitante FDB;
-    private JDPersona DBPersona;
-    private JDVivienda DBVivienda;
-    private JDCalle DBCalle;
+    private JDHabitante DBHabitante = new JDHabitante();
+    private JDPersona DBPersona = new JDPersona();
+    private JDVivienda DBVivienda = new JDVivienda();
+    private JDCalle DBCalle = new JDCalle();
 
     @FXML
     public void initialize() {
@@ -75,22 +100,20 @@ public class HabitanteController {
                 "Sobrino",
                 "Otro"
         );
+
+        configurarTablaBusqueda();
     }
 
+    //JavaFX - Eventos Crear habitante
     @FXML
-    void preguntarAsignar(ActionEvent event) throws InterruptedException {
+    void preguntarAsignar(ActionEvent event) {
         if(!validarCamposCorrectos()) return;
-
-        FDB = new JDHabitante();
-        DBPersona = new JDPersona();
-        DBVivienda = new JDVivienda();
-        DBCalle = new JDCalle();
 
         int idPersona = Integer.parseInt(in_idPersonaRegistro.getText());
         int idVivienda = Integer.parseInt(in_idViviendaRegistro.getText());
         String rol = in_comboRol.getValue();
 
-        if(!consultarDatos(idPersona, idVivienda, rol)) return;
+        if(!consultarDatosHabitante(idPersona, idVivienda, rol)) return;
 
         mostrarDatos();
         invertirCamposEntrada();
@@ -99,7 +122,7 @@ public class HabitanteController {
 
     @FXML
     void asignarHabitante(ActionEvent event) {
-        FDB.insertarHabitante(habitanteBD.getIdPersona(), habitanteBD.getIdVivienda(), habitanteBD.getRol());
+        DBHabitante.insertarHabitante(habitanteBD.getIdPersona(), habitanteBD.getIdVivienda(), habitanteBD.getRol());
 
         out_infoOperacion.setText("Habitante asignado correctamente");
 
@@ -125,74 +148,153 @@ public class HabitanteController {
         invertirCamposEntrada();
     }
 
+    //JavaFX - Eventos Busqueda de habitantes
+    @FXML
+    void buscarHabitante(ActionEvent event) {
+        if(!in_idPersonaRegistro.getText().isBlank() && !in_idPersonaRegistro.getText().matches("[0-9]+")){
+            this.mensajeOperacion = "El campo de Id de persona debe ser un numero";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+            mostrarInfoOperacion();
+            return;
+        }
+
+        if(!in_idViviendaRegistro.getText().isBlank() && !in_idViviendaRegistro.getText().matches("[0-9]+")){
+            this.mensajeOperacion = "El campo de Id de vivienda debe ser un numero";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+            mostrarInfoOperacion();
+            return;
+        }
+
+        ObservableList<Map<String, Object>> resultadoBusqueda = null;
+        Integer idPersona = null;
+        Integer idVivienda = null;
+        String rol = null;
+
+        if(validarIdPersona()) idPersona = Integer.parseInt(in_idPersonaRegistro.getText());
+        if(validarIdVivienda()) idVivienda = Integer.parseInt(in_idViviendaRegistro.getText());
+        if(validarRol()) rol = in_comboRol.getValue();
+
+        resultadoBusqueda = DBHabitante.buscarHabitantes(idPersona, idVivienda, rol);
+
+        if(resultadoBusqueda == null){
+            mensajeOperacion = "No se encontraron resultados";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+        }
+        else{
+            try{
+                mensajeOperacion = "Resultados encontrados: " + resultadoBusqueda.size();
+                out_infoOperacion.fillProperty().set(colorBlanco);
+
+                tabla_busquedaHabitante.getItems().clear();
+                for(Map<String, Object> fila : resultadoBusqueda){
+                    tabla_busquedaHabitante.getItems().add(fila);
+                }
+            }
+            catch(Exception e){
+                System.out.println("Error al obtener datos de la tabla: " + e.getMessage());
+            }
+        }
+
+        mostrarInfoOperacion();
+        pane_tablaBusqueda.setVisible(true);
+        pane_entradaBusqueda.setVisible(false);
+    }
+
+    @FXML
+    void buscarOtroHabitante(ActionEvent event) {
+        in_idPersonaRegistro.clear();
+        in_idViviendaRegistro.clear();
+        in_comboRol.setValue(null);
+        tabla_busquedaHabitante.getItems().clear();
+
+        out_infoOperacion.setVisible(false);
+        pane_tablaBusqueda.setVisible(false);
+        pane_entradaBusqueda.setVisible(true);
+    }
+
+    //JavaFX - Eventos Generales
     @FXML
     void volverInicio(ActionEvent event) {
         //TODO: Cambiar de ventana
     }
 
-    public boolean validarCamposCorrectos() throws InterruptedException {
+    public boolean validarCamposCorrectos() {
         out_infoOperacion.fillProperty().set(colorAdvertencia);
-        if(in_idPersonaRegistro.getText().isBlank() && in_idViviendaRegistro.getText().isBlank()){
-            out_infoOperacion.setText("Debe ingresar los campos de Id de persona y vivienda");
-            out_infoOperacion.setVisible(true);
 
+        if(!validarIdPersona()){
+            mostrarInfoOperacion();
+            in_idPersonaRegistro.requestFocus();
             return false;
         }
+
+        if(!validarIdVivienda()){
+            mostrarInfoOperacion();
+            in_idViviendaRegistro.requestFocus();
+            return false;
+        }
+
+        if(!validarRol()){
+            mostrarInfoOperacion();
+            in_comboRol.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean validarIdPersona(){
+        out_infoOperacion.fillProperty().set(colorAdvertencia);
 
         if(in_idPersonaRegistro.getText().isBlank()){
-            out_infoOperacion.setText("El campo de Id de persona es necesario");
-            out_infoOperacion.setVisible(true);
-            in_idPersonaRegistro.requestFocus();
-
-            return false;
-        }
-
-        if(in_idViviendaRegistro.getText().isBlank()){
-            out_infoOperacion.setText("El campo de Id de vivienda es necesario");
-            out_infoOperacion.setVisible(true);
-            in_idViviendaRegistro.requestFocus();
-
-            return false;
-        }
-
-        if(!in_idPersonaRegistro.getText().matches("[0-9]+")
-                && !in_idViviendaRegistro.getText().matches("[0-9]+")){
-            out_infoOperacion.setText("Los campos de Id de persona y vivienda deben ser numeros");
-            out_infoOperacion.setVisible(true);
+            this.mensajeOperacion = "El campo de Id de persona es necesario";
 
             return false;
         }
 
         if(!in_idPersonaRegistro.getText().matches("[0-9]+")){
-            out_infoOperacion.setText("El campo de Id de persona debe ser un numero");
-            out_infoOperacion.setVisible(true);
-            in_idPersonaRegistro.requestFocus();
+            this.mensajeOperacion = "El campo de Id de persona debe ser un numero";
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean validarIdVivienda(){
+        out_infoOperacion.fillProperty().set(colorAdvertencia);
+
+        if(in_idViviendaRegistro.getText().isBlank()){
+            this.mensajeOperacion = "El campo de Id de vivienda es necesario";
 
             return false;
         }
 
         if(!in_idViviendaRegistro.getText().matches("[0-9]+")){
-            out_infoOperacion.setText("El campo de Id de vivienda debe ser un numero");
-            out_infoOperacion.setVisible(true);
-            in_idViviendaRegistro.requestFocus();
+            this.mensajeOperacion = "El campo de Id de vivienda debe ser un numero";
 
             return false;
         }
-
-        if(in_comboRol.getValue() == null){
-            out_infoOperacion.setText("Debe seleccionar un rol");
-            out_infoOperacion.setVisible(true);
-            in_comboRol.requestFocus();
-
-            return false;
-        }
-
-        out_infoOperacion.setVisible(false);
 
         return true;
     }
 
-    public boolean consultarDatos(int idPersona, int idVivienda, String rol){
+    public boolean validarRol(){
+        out_infoOperacion.fillProperty().set(colorAdvertencia);
+
+        if(in_comboRol.getValue() == null){
+            this.mensajeOperacion = "El campo de rol es necesario";
+            return false;
+        }
+
+        return true;
+    }
+
+    public void mostrarInfoOperacion(){
+        out_infoOperacion.setText(this.mensajeOperacion);
+        out_infoOperacion.setVisible(true);
+    }
+
+    public boolean consultarDatosHabitante(int idPersona, int idVivienda, String rol){
         personaBD = DBPersona.obtenerPersona(idPersona);
         if(personaBD == null){
             System.out.println("La persona no existe");
@@ -211,7 +313,7 @@ public class HabitanteController {
             return false;
         }
 
-        habitanteBD = new HabitanteBD(idPersona, idVivienda, in_comboRol.getValue());
+        habitanteBD = new HabitanteBD(idPersona, idVivienda, rol);
 
         return true;
     }
@@ -275,5 +377,37 @@ public class HabitanteController {
         out_nombreCalRegistro.setText(calleBD.getNombre());
         out_numExtRegistro.setText(String.valueOf(viviendaBD.getNum_ext()));
         out_numIntRegistro.setText(String.valueOf(viviendaBD.getNum_int()).equals("0") ? "S/N" : String.valueOf(viviendaBD.getNum_int()));
+    }
+
+    private void configurarTablaBusqueda() {
+        colIdPersona.setCellValueFactory(data ->
+                new SimpleObjectProperty<>(data.getValue().get("IdPersona")));
+
+        colNombre.setCellValueFactory(data ->
+                new SimpleObjectProperty<>(data.getValue().get("Nombre")));
+
+        colRol.setCellValueFactory(data ->
+                new SimpleObjectProperty<>(data.getValue().get("Rol")));
+
+        colIdVivienda.setCellValueFactory(data ->
+                new SimpleObjectProperty<>(data.getValue().get("IdVivienda")));
+
+        colTipoVivienda.setCellValueFactory(data ->
+                new SimpleObjectProperty<>(data.getValue().get("TipoVivienda")));
+
+        colNoExt.setCellValueFactory(data ->
+                new SimpleObjectProperty<>(data.getValue().get("NumExt")));
+
+        colNoInt.setCellValueFactory(data ->
+                new SimpleObjectProperty<>(data.getValue().get("NumInt")));
+
+        colMetrosCuadrados.setCellValueFactory(data ->
+                new SimpleObjectProperty<>(data.getValue().get("MetrosCuadrados")));
+
+        colIdCalle.setCellValueFactory(data ->
+                new SimpleObjectProperty<>(data.getValue().get("IdCalle")));
+
+        colNombreCalle.setCellValueFactory(data ->
+                new SimpleObjectProperty<>(data.getValue().get("Calle")));
     }
 }

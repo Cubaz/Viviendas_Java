@@ -14,7 +14,7 @@
 
 <AnchorPane prefHeight="673.0" prefWidth="900.0" style="-fx-background-color: #cc3a63;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.HabitanteController">
    <children>
-      <Text fill="#f9f0e0" layoutX="194.0" layoutY="63.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ASIGNAR VIVIENDA">
+      <Text fill="#f9f0e0" layoutX="194.0" layoutY="63.0" strokeType="OUTSIDE" strokeWidth="0.0" text="CREAR HABITANTE">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="58.0" />
          </font>
