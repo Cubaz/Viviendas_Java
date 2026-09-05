@@ -1,9 +1,17 @@
 package ObjetosBD.Departamento;
 
 public class DepartamentoBD {
+    private int id_departamento;
     private int id_edificio;
     private int id_vivienda;
     private int piso;
+
+    public DepartamentoBD(int idDepartamento, int idEdficio, int idVivienda, int num_piso){
+        this.id_departamento = idDepartamento;
+        this.id_edificio = idEdficio;
+        this.id_vivienda = idVivienda;
+        this.piso = num_piso;
+    }
 
     public int getId_vivienda(){return id_vivienda;}
 

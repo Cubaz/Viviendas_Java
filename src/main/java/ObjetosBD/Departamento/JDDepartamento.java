@@ -1,6 +1,8 @@
 package ObjetosBD.Departamento;
 import ObjetosBD.Conexion;
+
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -32,4 +34,49 @@ public class JDDepartamento {
         return -1;
     }
 
+    public DepartamentoBD buscarDepartamento(int idDepartamento){
+        String SQL = "SELECT * FROM departamento WHERE id_departamento = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idDepartamento);
+            try(ResultSet RS = PS.executeQuery()){
+                if(RS.next()){
+                    int idEdificio = RS.getInt("id_edificio");
+                    int idVivienda = RS.getInt("id_vivienda");
+                    int piso = RS.getInt("dep_piso");
+
+                    return new DepartamentoBD(idDepartamento, idEdificio, idVivienda, piso);
+                }
+            }
+        }catch (SQLException e){
+            System.out.println("ERROR AL BUSCAR DEPARTAMENTO " + e.getMessage());
+        }
+        return null;
+    }
+
+    public boolean actualizarDepartamento(int idDepartamento, int idEdificio, int idVivienda, int piso){
+        String SQL = "UPDATE departamento SET id_edificio = ?, id_vivienda = ?, dep_piso = ? WHERE id_departamento = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idEdificio);
+            PS.setInt(2, idVivienda);
+            PS.setInt(3, piso);
+            PS.setInt(4, idDepartamento);
+
+            return PS.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.out.println("ERROR AL ACTUALIZAR DEPARTAMENTO: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean eliminarDepartamento(int idDepartamento){
+        String SQL = "DELETE FROM departamento WHERE id_departamento = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idDepartamento);
+
+            return PS.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.out.println("ERROR AL ELIMINAR DEPARTAMENTO: " + e.getMessage());
+            return false;
+        }
+    }
 }
