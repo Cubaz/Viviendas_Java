@@ -9,6 +9,16 @@ public class ViviendaBD {
     private int num_int;
     private float mts_cuadrados;
 
+    public ViviendaBD(int idVivienda, String tipoVivienda, int idPropietario, int habitantes, int numExterior, int numInterior, float metrosCuadrados){
+        this.id_vivienda = idVivienda;
+        this.tipo = tipoVivienda;
+        this.id_propietario = idPropietario;
+        this.num_habitantes = habitantes;
+        this.num_ext = numExterior;
+        this.num_int = numInterior;
+        this.mts_cuadrados = metrosCuadrados;
+    }
+
     public int getId_vivienda(){return id_vivienda;}
     public void setId_vivienda(int id_vivienda){this.id_vivienda = id_vivienda;}
 

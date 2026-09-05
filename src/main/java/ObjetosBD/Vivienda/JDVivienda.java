@@ -2,8 +2,6 @@ package ObjetosBD.Vivienda;
 
 import ObjetosBD.Conexion;
 
-import javax.swing.table.DefaultTableModel;
-import java.awt.desktop.SystemSleepEvent;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,22 +36,56 @@ public class JDVivienda {
         return -1;
     }
 
-//    public DefaultTableModel buscarVivienda(int criterio, String parametro){
-//        String SQL;
-//        if(criterio == 0){
-//            SQL = "SELECT * FROM vivienda WHERE idVivienda like" + parametro + "%";
-//        }else{
-//            SQL = "SELECT * FROM propietario pr, persona pe WHERE (pr.id_persona = pe.id_persona) AND (pe.per_nombre=" + parametro + ")";
-//        }
-//
-//        try{
-//            PS = CN.getConexion().prepareStatement(SQL);
-//            RS = PS.executeQuery();
-//
-//
-//        } catch (SQLException e) {
-//            System.out.println("ERROR AL BUSCAR VIVIENDA "+ e.getMessage());
-//        }
-//    }
+    public ViviendaBD buscarVivienda(int idVivienda){
+        String SQL="SELECT * FROM vivienda WHERE id_vivienda = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idVivienda);
+            try(ResultSet RS = PS.executeQuery()){
+                if(RS.next()){
+                    String tipo = RS.getString("viv_tipo");
+                    int habitantes = RS.getInt("viv_habitantes");
+                    int numExterior = RS.getInt("viv_numExt");
+                    int numInterior = RS.getInt("viv_numInt");
+                    int idCalle = RS.getInt("id_calle");
+                    float metroscuadrados = RS.getFloat("viv_mtscuadrados");
+
+                    return new ViviendaBD(idVivienda, tipo, habitantes, numExterior, numInterior, idCalle, metroscuadrados);
+                }
+            }
+        }catch (SQLException e){
+            System.out.println("ERROR AL BUSCAR VIVIENDA: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public boolean actualizarVivienda(int idVivienda, String tipo, int habitantes, int numExterior, int numInterior, int idCalle, float metros){
+        String SQL = "UPDATE vivienda SET viv_tipo = ?, viv_habitantes = ?, viv_numExt = ?, viv_numInt = ?, id_calle = ?, viv_metroscuadrados = ? WHERE id_vivienda = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setString(1, tipo);
+            PS.setInt(2, habitantes);
+            PS.setInt(3, numExterior);
+            PS.setInt(4, numInterior);
+            PS.setInt(5, idCalle);
+            PS.setFloat(6, metros);
+            PS.setInt(7, idVivienda);
+
+            return PS.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.out.println("ERROR AL ACTUALIZAR: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean eliminarVivienda(int idVivienda){
+        String SQL = "DELETE FROM vivienda WHERE id_vivienda = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idVivienda);
+
+            return PS.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.out.println("ERROR AL ELIMINAR VIVIENDA: " + e.getMessage());
+            return false;
+        }
+    }
 
 }
