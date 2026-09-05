@@ -58,4 +58,69 @@ public class JDPersona {
         }
         return lista;
     }
+
+    public PersonaBD buscarPersonaID(int idPersona){
+        String SQL = "SELECT * FROM persona WHERE id_Persona = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idPersona);
+            try(ResultSet RS = PS.executeQuery()){
+                if(RS.next()){
+                    String nombre = RS.getString("per_nombre");
+                    int familia = RS.getInt("id_familia");
+                    int edad = RS.getInt("per_edad");
+
+                    return new PersonaBD(idPersona, nombre, familia, edad);
+                }
+            }
+        }catch (SQLException e){
+            System.out.println("ERROR AL BUSCAR POR ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public PersonaBD buscarPersonaNombre(String nombrePersona){
+        String SQL = "SELECT * FROM persona WHERE per_nombre LIKE ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setString(1, "%" + nombrePersona + "%");
+            try(ResultSet RS = PS.executeQuery()){
+                if(RS.next()){
+                    int id = RS.getInt("id_persona");
+                    String nombre = RS.getString("per_nombre");
+                    int familia = RS.getInt("id_familia");
+                    int edad = RS.getInt("per_edad");
+
+                    return new PersonaBD(id, nombre, familia, edad);
+                }
+            }
+        }catch (SQLException e){
+            System.out.println("ERROR AL BUSCAR POR NOMBRE: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public boolean actualizarPersona(int idPersona, String nombrePersona, int idFamilia, int edad){
+        String SQL = "UPDATE persona SET per_nombre = ?, id_familia = ?, per_edad = ? WHERE id_persona = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setString(1, nombrePersona);
+            PS.setInt(2, idFamilia);
+            PS.setInt(3, edad);
+            PS.setInt(4, idFamilia);
+
+            return PS.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.out.println("ERROR AL ACTUALIZAR PERSONA: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean eliminarPersona(int idPersona){
+        String SQL = "DELETE FROM persona WHERE id_persona = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idPersona);
+            return PS.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.out.println("ERROR AL ELIMINAR PERSONA: " + e.getMessage());
+            return false;
+        }
+    }
 }

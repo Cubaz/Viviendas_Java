@@ -2,8 +2,10 @@ package ObjetosBD.Vivienda;
 
 import ObjetosBD.Conexion;
 
+import javax.swing.table.DefaultTableModel;
 import java.awt.desktop.SystemSleepEvent;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -31,11 +33,27 @@ public class JDVivienda {
             }
 
         }catch(SQLException e){
-            System.out.println("ERROR AL INSERTAR VIVIENDA" + e);
+            System.out.println("ERROR AL INSERTAR VIVIENDA" + e.getMessage());
         }
         return -1;
     }
 
-
+//    public DefaultTableModel buscarVivienda(int criterio, String parametro){
+//        String SQL;
+//        if(criterio == 0){
+//            SQL = "SELECT * FROM vivienda WHERE idVivienda like" + parametro + "%";
+//        }else{
+//            SQL = "SELECT * FROM propietario pr, persona pe WHERE (pr.id_persona = pe.id_persona) AND (pe.per_nombre=" + parametro + ")";
+//        }
+//
+//        try{
+//            PS = CN.getConexion().prepareStatement(SQL);
+//            RS = PS.executeQuery();
+//
+//
+//        } catch (SQLException e) {
+//            System.out.println("ERROR AL BUSCAR VIVIENDA "+ e.getMessage());
+//        }
+//    }
 
 }

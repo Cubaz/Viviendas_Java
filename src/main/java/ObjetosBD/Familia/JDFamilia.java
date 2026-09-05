@@ -51,6 +51,65 @@ public class JDFamilia {
         }
         return lista;
     }
+
+    public FamiliaBD buscarFamiliaID(int idFamilia){
+        String SQL = "SELECT * FROM familia WHERE id_familia = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idFamilia);
+            try(ResultSet RS = PS.executeQuery()){
+                if(RS.next()){
+                    String fam_apellidos = RS.getString("fam_apellidos");
+
+                    return new FamiliaBD(idFamilia, fam_apellidos);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("ERROR AL BUSCAR FAMILIA POR ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public FamiliaBD buscarFamiliaApellidos(String apellidosFamilia){
+        String SQL = "SELECT * FROM familia WHERE fam_apellidos LIKE ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setString(1, "%" + apellidosFamilia + "%");
+            try(ResultSet RS = PS.executeQuery()){
+                if(RS.next()){
+                    int id = RS.getInt("id_familia");
+                    String apellidos = RS.getString("fam_apellidos");
+
+                    return new FamiliaBD(id, apellidos);
+                }
+            }
+        }catch (SQLException e){
+            System.out.println("ERROR AL BUSCAR POR APELLIDOS: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public boolean actualizarFamilia(int idFamilia, String apellidos){
+        String SQL = "SELECT * FROM familia WHERE id_familia = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idFamilia);
+            PS.setString(2, apellidos);
+
+            return PS.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.out.println("ERROR AL ACTUALIZAR FAMILIA: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean eliminarFamilia(int idFamilia){
+        String SQL = "DELETE FROM familia WHERE id_familia = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idFamilia);
+            return PS.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.out.println("ERROR AL ELIMINAR FAMILIA: " + e.getMessage());
+            return false;
+        }
+    }
 }
 
 
