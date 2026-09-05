@@ -1,7 +1,6 @@
 package ObjetosBD.Persona;
 
 import ObjetosBD.Conexion;
-import ObjetosBD.Edificio.EdificioBD;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -60,7 +59,7 @@ public class JDPersona {
     }
 
     public PersonaBD buscarPersonaID(int idPersona){
-        String SQL = "SELECT * FROM persona WHERE id_Persona = ?";
+        String SQL = "SELECT * FROM persona WHERE id_persona = ?";
         try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
             PS.setInt(1, idPersona);
             try(ResultSet RS = PS.executeQuery()){
@@ -104,7 +103,7 @@ public class JDPersona {
             PS.setString(1, nombrePersona);
             PS.setInt(2, idFamilia);
             PS.setInt(3, edad);
-            PS.setInt(4, idFamilia);
+            PS.setInt(4, idPersona);
 
             return PS.executeUpdate() > 0;
         }catch (SQLException e){

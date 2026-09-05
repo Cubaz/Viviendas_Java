@@ -88,10 +88,10 @@ public class JDFamilia {
     }
 
     public boolean actualizarFamilia(int idFamilia, String apellidos){
-        String SQL = "SELECT * FROM familia WHERE id_familia = ?";
+        String SQL = "UPDATE familia SET fam_apellidos = ? WHERE id_familia = ?";
         try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
-            PS.setInt(1, idFamilia);
-            PS.setString(2, apellidos);
+            PS.setString(1, apellidos);
+            PS.setInt(2, idFamilia);
 
             return PS.executeUpdate() > 0;
         }catch (SQLException e){

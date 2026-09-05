@@ -1,7 +1,6 @@
 package ObjetosBD.Calle;
 
 import ObjetosBD.Conexion;
-import ObjetosBD.Edificio.EdificioBD;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -54,5 +53,67 @@ public class JDCalle {
             System.out.println("Error al obtener calles: " + e.getMessage());
         }
         return lista;
+    }
+
+    public CalleBD buscarCalleID(int idCalle){
+        String SQL = "SELECT * FROM calle WHERE id_calle = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idCalle);
+            try(ResultSet RS = PS.executeQuery()){
+                if(RS.next()){
+                    String calleNombre = RS.getString("cal_nombre");
+                    int idColonia = RS.getInt("id_colonia");
+
+                    return new CalleBD(idCalle, calleNombre, idColonia);
+                }
+            }
+        }catch (SQLException e){
+            System.out.println("ERROR AL BUSCAR CALLE POR ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public CalleBD buscarCalleNombre(String nombreCalle){
+        String SQL = "SELECT * FROM calle WHERE cal_nombre LIKE ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setString(1, "%" + nombreCalle + "%");
+            try(ResultSet RS = PS.executeQuery()){
+                if(RS.next()){
+                    int id = RS.getInt("id_calle");
+                    String nombre = RS.getString("cal_nombre");
+                    int idColonia = RS.getInt("id_colonia");
+
+                    return new CalleBD(id, nombre, idColonia);
+                }
+            }
+        }catch (SQLException e){
+            System.out.println("ERROR AL BUSCAR CALLE POR NOMBRE: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public boolean actualizarCalle(int idCalle, String nombre, int IdColonia){
+        String SQL = "UPDATE calle SET cal_nombre = ?, id_colonia = ? WHERE id_calle = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setString(1, nombre);
+            PS.setInt(2, IdColonia);
+            PS.setInt(3, idCalle);
+
+            return PS.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.out.println("ERROR AL ACTUALIZAR CALLE: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean eliminarCalle(int idCalle){
+        String SQL = "DELETE FROM calle WHERE id_calle = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idCalle);
+            return PS.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("ERROR AL ELIMINAR CALLE: " + e.getMessage());
+            return false;
+        }
     }
 }
