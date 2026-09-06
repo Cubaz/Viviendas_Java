@@ -4,6 +4,11 @@ public class PropietarioBD {
     private int id_vivienda;
     private int id_persona;
 
+    public PropietarioBD(int vivienda, int persona){
+        this.id_vivienda = vivienda;
+        this.id_persona = persona;
+    }
+
     public int getId_persona() {
         return id_persona;
     }

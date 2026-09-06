@@ -6,8 +6,8 @@ public class ViviendaBD {
     private int num_habitantes;
     private int num_ext;
     private int num_int;
-    private int id_calle;
     private float mts_cuadrados;
+    private int id_calle;
 
     ViviendaBD(int id_vivienda, String tipo, int num_habitantes, int num_ext, int num_int, int id_calle, float mts_cuadrados){
         this.id_vivienda = id_vivienda;

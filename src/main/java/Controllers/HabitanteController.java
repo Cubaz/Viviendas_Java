@@ -82,7 +82,7 @@ public class HabitanteController {
     private CalleBD calleBD;
     private HabitanteBD habitanteBD;
     private ArrayList<HabitanteBD> habitantesBD;
-    
+
     private JDHabitante DBHabitante = new JDHabitante();
     private JDPersona DBPersona = new JDPersona();
     private JDVivienda DBVivienda = new JDVivienda();
@@ -295,19 +295,19 @@ public class HabitanteController {
     }
 
     public boolean consultarDatosHabitante(int idPersona, int idVivienda, String rol){
-        personaBD = DBPersona.obtenerPersona(idPersona);
+        personaBD = DBPersona.buscarPersonaID(idPersona);
         if(personaBD == null){
             System.out.println("La persona no existe");
             return false;
         }
 
-        viviendaBD = DBVivienda.obtenerVivienda(idVivienda);
+        viviendaBD = DBVivienda.buscarVivienda(idVivienda);
         if(viviendaBD == null){
             System.out.println("La vivienda no existe");
             return false;
         }
 
-        calleBD = DBCalle.obtenerCalle(viviendaBD.getId_calle());
+        calleBD = DBCalle.buscarCalleID(viviendaBD.getId_calle());
         if(calleBD == null){
             System.out.println("La calle no existe");
             return false;
