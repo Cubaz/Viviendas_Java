@@ -8,15 +8,22 @@ import ObjetosBD.Persona.JDPersona;
 import ObjetosBD.Persona.PersonaBD;
 import ObjetosBD.Vivienda.JDVivienda;
 import ObjetosBD.Vivienda.ViviendaBD;
+import javafx.animation.FadeTransition;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.*;
 
 
@@ -112,7 +119,7 @@ public class HabitanteController {
 
                 if(!existePersona(Integer.parseInt(in_idPersona.getText()))) return;
                 if(!existeVivienda(Integer.parseInt(in_idVivienda.getText()))) return;
-                calleBD = DBCalle.buscarCalleID(viviendaBD.getId_calle());
+                calleBD = DBCalle.buscarCalleID(viviendaBD.getIdCalle());
 
                 cargarPaneDatosHabitante();
                 btn_confirmacion.setText("Crear habitante");
@@ -151,7 +158,7 @@ public class HabitanteController {
 
                 if(!existePersona(Integer.parseInt(in_idPersona.getText()))) return;
                 if(!existeVivienda(habitanteBD.getIdVivienda())) return;
-                calleBD = DBCalle.buscarCalleID(viviendaBD.getId_calle());
+                calleBD = DBCalle.buscarCalleID(viviendaBD.getIdCalle());
 
                 out_infoOperacion.setVisible(false);
                 cargarPaneDatosHabitante();
@@ -162,8 +169,33 @@ public class HabitanteController {
         }
     }
 
-    @FXML void volverMenuPrincipal(ActionEvent event) {
-        //TODO: Cambiar de ventana
+    @FXML void volverMenuPrincipal(ActionEvent event) throws IOException {
+        /// CARGA LA VISTA DE LA INTERFAZ DE LOGIN
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/MenuPrincipal.fxml"));
+        Parent root = loader.load();
+
+        /// OBTIENE LA VENTANA ACTUAL
+        Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+
+        // ANIMACIÓN DE SALIDA
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), stage.getScene().getRoot());
+        fadeOut.setFromValue(1);
+        fadeOut.setToValue(0);
+
+        fadeOut.setOnFinished(e -> {
+
+            ///CAMBIA A LA ESCENA DE LOGIN
+            Scene nuevaEscena = new Scene(root);
+            stage.setScene(nuevaEscena);
+
+            // ANIMACIÓN DE ENTRADA
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), root);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            fadeIn.play();
+        });
+
+        fadeOut.play();
     }
 
     @FXML void volverVentanaAnterior(ActionEvent event) {

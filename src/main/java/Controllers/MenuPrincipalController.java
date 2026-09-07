@@ -141,7 +141,7 @@ public class MenuPrincipalController {
     @FXML
     void habitantes(ActionEvent event) throws IOException {
         /// CARGA LA VISTA DE LA INTERFAZ DE LOGIN
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/CrearHab.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/Habitante.fxml"));
         Parent root = loader.load();
 
         /// OBTIENE LA VENTANA ACTUAL

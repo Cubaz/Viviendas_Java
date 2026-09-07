@@ -92,5 +92,10 @@
             <Font size="37.0" />
          </font>
       </Text>
+      <Button layoutX="75.0" layoutY="48.0" mnemonicParsing="false" onAction="#regresar" prefHeight="49.0" prefWidth="199.0" style="-fx-background-color: #FFF7EB;" text="REGRESAR" textFill="#540707">
+         <font>
+            <Font name="CocogooseProTrial Darkmode" size="23.0" />
+         </font>
+      </Button>
     </children>
 </AnchorPane>

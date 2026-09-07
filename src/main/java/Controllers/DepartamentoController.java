@@ -361,4 +361,7 @@ public class DepartamentoController {
         out_infoOperacion.setText(mensaje);
         out_infoOperacion.setVisible(true);
     }
+
+
+
 }

@@ -2,17 +2,25 @@ package Controllers;
 
 import ObjetosBD.Colonia.ColoniaBD;
 import ObjetosBD.Colonia.JDColonia;
+import javafx.animation.FadeTransition;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import java.io.IOException;
 
 public class ColoniaController {
 
@@ -152,6 +160,35 @@ public class ColoniaController {
         mostrarInfoOperacion();
     }
 
+    @FXML
+    void regresar(ActionEvent event) throws IOException {
+        /// CARGA LA VISTA DE LA INTERFAZ DE LOGIN
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/MenuPrincipal.fxml"));
+        Parent root = loader.load();
+
+        /// OBTIENE LA VENTANA ACTUAL
+        Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+
+        // ANIMACIÓN DE SALIDA
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), stage.getScene().getRoot());
+        fadeOut.setFromValue(1);
+        fadeOut.setToValue(0);
+
+        fadeOut.setOnFinished(e -> {
+
+            ///CAMBIA A LA ESCENA DE LOGIN
+            Scene nuevaEscena = new Scene(root);
+            stage.setScene(nuevaEscena);
+
+            // ANIMACIÓN DE ENTRADA
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), root);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            fadeIn.play();
+        });
+
+        fadeOut.play();
+    }
 
 
     // Eliminar colonia

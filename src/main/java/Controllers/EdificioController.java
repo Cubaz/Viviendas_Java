@@ -2,15 +2,22 @@ package Controllers;
 
 import ObjetosBD.Edificio.EdificioBD;
 import ObjetosBD.Edificio.JDEdificio;
+import javafx.animation.FadeTransition;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.*;
 
 enum operacionEdificio {
@@ -241,8 +248,33 @@ public class EdificioController {
     }
 
     @FXML
-    void volverMenuPrincipal(ActionEvent event) {
-        // Implementación según la navegación del proyecto
+    void volverMenuPrincipal(ActionEvent event) throws IOException {
+        /// CARGA LA VISTA DE LA INTERFAZ DE LOGIN
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/MenuPrincipal.fxml"));
+        Parent root = loader.load();
+
+        /// OBTIENE LA VENTANA ACTUAL
+        Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+
+        // ANIMACIÓN DE SALIDA
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), stage.getScene().getRoot());
+        fadeOut.setFromValue(1);
+        fadeOut.setToValue(0);
+
+        fadeOut.setOnFinished(e -> {
+
+            ///CAMBIA A LA ESCENA DE LOGIN
+            Scene nuevaEscena = new Scene(root);
+            stage.setScene(nuevaEscena);
+
+            // ANIMACIÓN DE ENTRADA
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), root);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            fadeIn.play();
+        });
+
+        fadeOut.play();
     }
 
     private void cambiarPane(AnchorPane origen, AnchorPane destino) {

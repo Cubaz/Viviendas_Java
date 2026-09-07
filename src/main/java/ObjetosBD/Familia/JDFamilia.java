@@ -52,7 +52,27 @@ public class JDFamilia {
         return lista;
     }
 
-    public ObservableList<FamiliaBD> buscarFamiliaID(int idFamilia){
+    public FamiliaBD buscarFamiliaID(int idFamilia){
+
+        String SQL = "SELECT * FROM familia WHERE id_familia LIKE ?";
+
+        try (PreparedStatement PS = CN.getConexion().prepareStatement(SQL)) {
+            PS.setString(1, "%" + idFamilia + "%");
+            try (ResultSet RS = PS.executeQuery()) {
+                while (RS.next()) {
+                    int id = RS.getInt("id_familia");
+                    String apellido = RS.getString("fam_apellidos");
+                    return new FamiliaBD(id, apellido);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("ERROR AL BUSCAR FAMILIAS POR ID: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    public ObservableList<FamiliaBD> buscarFamiliaIDTABLA(int idFamilia){
         ObservableList<FamiliaBD> lista = FXCollections.observableArrayList();
         String SQL = "SELECT * FROM familia WHERE id_familia LIKE ?";
 
