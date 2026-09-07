@@ -232,4 +232,35 @@ public class MenuPrincipalController {
     }
 
 
+    @FXML
+    void departamento(ActionEvent event) throws IOException {
+        /// CARGA LA VISTA DE LA INTERFAZ DE LOGIN
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/Departamento.fxml"));
+        Parent root = loader.load();
+
+        /// OBTIENE LA VENTANA ACTUAL
+        Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+
+        // ANIMACIÓN DE SALIDA
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), stage.getScene().getRoot());
+        fadeOut.setFromValue(1);
+        fadeOut.setToValue(0);
+
+        fadeOut.setOnFinished(e -> {
+
+            ///CAMBIA A LA ESCENA DE LOGIN
+            Scene nuevaEscena = new Scene(root);
+            stage.setScene(nuevaEscena);
+
+            // ANIMACIÓN DE ENTRADA
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), root);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            fadeIn.play();
+        });
+
+        fadeOut.play();
+    }
+
+
 }
