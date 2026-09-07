@@ -13,7 +13,7 @@ import java.util.Map;
 public class JDHabitante {
     private Conexion conexion = new Conexion();
 
-    public void insertarHabitante(int idPersona, int idVivienda, String rol){
+    public boolean insertarHabitante(int idPersona, int idVivienda, String rol){
         String sentencia = "INSERT INTO habitantes (id_persona, id_vivienda, hab_rol) VALUES (?, ?, ?)";
 
         try(PreparedStatement ps = conexion.getConexion().prepareStatement(sentencia)){
@@ -23,12 +23,14 @@ public class JDHabitante {
             int filas = ps.executeUpdate();
 
             if(filas > 0){
-                System.out.println("Habitante registrado correctamente");
+                return true;
             }
         }
         catch(SQLException e){
             System.out.println("Error al insertar habitante: " + e.getMessage());
         }
+
+        return false;
     }
 
     public ObservableList<Map<String, Object>> buscarHabitantes(Integer idPersona, Integer idVivienda, String rol){
