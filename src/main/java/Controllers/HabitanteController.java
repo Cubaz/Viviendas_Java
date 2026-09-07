@@ -127,9 +127,7 @@ public class HabitanteController {
             case ACTUALIZAR:
                 habitanteBD = DBHabitante.buscarHabitante(Integer.parseInt(in_idPersona.getText()));
                 if(habitanteBD == null){
-                    mensajeOperacion = "El habitante no existe";
-                    out_infoOperacion.fillProperty().set(colorAdvertencia);
-                    mostrarInfoOperacion();
+                    mostrarInfoOperacion("El habitante no existe", colorAdvertencia);
                     cambiarPane(pane_actualizar, pane_entrada);
                     return;
                 }
@@ -144,6 +142,22 @@ public class HabitanteController {
                 break;
 
             case BORRAR:
+                habitanteBD = DBHabitante.buscarHabitante(Integer.parseInt(in_idPersona.getText()));
+                if(habitanteBD == null){
+                    mostrarInfoOperacion("El habitante no existe", colorAdvertencia);
+                    cambiarPane(pane_actualizar, pane_entrada);
+                    return;
+                }
+
+                if(!existePersona(Integer.parseInt(in_idPersona.getText()))) return;
+                if(!existeVivienda(habitanteBD.getIdVivienda())) return;
+                calleBD = DBCalle.buscarCalleID(viviendaBD.getId_calle());
+
+                out_infoOperacion.setVisible(false);
+                cargarPaneDatosHabitante();
+
+                btn_confirmacion.setText("Borrar habitante");
+                cambiarPane(pane_entrada, pane_confirmacion);
                 break;
         }
     }
@@ -170,6 +184,7 @@ public class HabitanteController {
                 break;
 
             case BORRAR:
+                operacionBorrar();
                 break;
         }
     }
@@ -207,9 +222,7 @@ public class HabitanteController {
     //Componentes generales
     private final Color colorAdvertencia = new Color(1.0f, 1.0f, 0.0f, 1.0f);
     private final Color colorExito = new Color(0.0f, 1.0f, 0.1529f, 1.0f);
-    private final Color colorBlanco = new Color(1.0f, 1.0f, 1.0f, 1.0f);
     private operacion opSeleccionada;
-    private String mensajeOperacion;
 
     private PersonaBD personaBD;
     private ViviendaBD viviendaBD;
@@ -225,23 +238,20 @@ public class HabitanteController {
     private AnchorPane pane_actual;
 
     //Eventos generales
-    public void mostrarInfoOperacion() {
-        out_infoOperacion.setText(this.mensajeOperacion);
+    public void mostrarInfoOperacion(String mensaje, Color color) {
+        out_infoOperacion.fillProperty().set(color);
+        out_infoOperacion.setText(mensaje);
         out_infoOperacion.setVisible(true);
     }
 
     public boolean validarIdPersona(TextField in_idPersona) {
-        out_infoOperacion.fillProperty().set(colorAdvertencia);
-
         if (in_idPersona.getText().isBlank()) {
-            this.mensajeOperacion = "El campo de Id de persona es necesario";
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("El campo de Id de persona es necesario", colorAdvertencia);
             return false;
         }
 
         if (!in_idPersona.getText().matches("[0-9]+")) {
-            this.mensajeOperacion = "El campo de Id de persona debe ser un numero";
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("El campo de Id de persona debe ser un numero", colorAdvertencia);
             return false;
         }
 
@@ -249,17 +259,13 @@ public class HabitanteController {
     }
 
     public boolean validarIdVivienda(TextField in_idVivienda) {
-        out_infoOperacion.fillProperty().set(colorAdvertencia);
-
         if (in_idVivienda.getText().isBlank()) {
-            this.mensajeOperacion = "El campo de Id de vivienda es necesario";
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("El campo de Id de vivienda es necesario", colorAdvertencia);
             return false;
         }
 
         if (!in_idVivienda.getText().matches("[0-9]+")) {
-            this.mensajeOperacion = "El campo de Id de vivienda debe ser un numero";
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("El campo de Id de vivienda debe ser un numero", colorAdvertencia);
             return false;
         }
 
@@ -267,11 +273,8 @@ public class HabitanteController {
     }
 
     public boolean validarRol(ComboBox<String> in_comboRol) {
-        out_infoOperacion.fillProperty().set(colorAdvertencia);
-
         if (in_comboRol.getValue() == null) {
-            this.mensajeOperacion = "El campo de rol es necesario";
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("El campo de rol es necesario", colorAdvertencia);
             return false;
         }
 
@@ -281,8 +284,7 @@ public class HabitanteController {
     public boolean existePersona(int idPersona) {
         personaBD = DBPersona.buscarPersonaID(idPersona);
         if (personaBD == null) {
-            mensajeOperacion = "La persona no existe";
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("La persona no existe", colorAdvertencia);
             return false;
         }
 
@@ -292,8 +294,7 @@ public class HabitanteController {
     public boolean existeVivienda(int idVivienda) {
         viviendaBD = DBVivienda.buscarVivienda(idVivienda);
         if (viviendaBD == null) {
-            mensajeOperacion = "La vivienda no existe";
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("La vivienda no existe", colorAdvertencia);
             return false;
         }
 
@@ -332,10 +333,10 @@ public class HabitanteController {
         in_idVivienda.clear();
         in_comboRol.getSelectionModel().clearSelection();
 
-        in_idVivienda.setVisible(opSeleccionada != operacion.ACTUALIZAR);
-        txt_viviendaEntrada.setVisible(opSeleccionada != operacion.ACTUALIZAR);
-        in_comboRol.setVisible(opSeleccionada != operacion.ACTUALIZAR);
-        txt_rolEntrada.setVisible(opSeleccionada != operacion.ACTUALIZAR);
+        in_idVivienda.setVisible(opSeleccionada.ordinal() < 2);
+        txt_viviendaEntrada.setVisible(opSeleccionada.ordinal() < 2);
+        in_comboRol.setVisible(opSeleccionada.ordinal() < 2);
+        txt_rolEntrada.setVisible(opSeleccionada.ordinal() < 2);
 
         cambiarPane(pane_inicio, pane_entrada);
         btn_volver.setVisible(true);
@@ -367,17 +368,12 @@ public class HabitanteController {
         boolean resultado = DBHabitante.insertarHabitante(Integer.parseInt(in_idPersona.getText()), Integer.parseInt(in_idVivienda.getText()), in_comboRol.getValue());
 
         if(resultado) {
-            mensajeOperacion = "Habitante creado correctamente";
-            out_infoOperacion.fillProperty().set(colorExito);
-
             in_idPersona.clear();
             in_idVivienda.clear();
             in_comboRol.getSelectionModel().clearSelection();
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("Habitante creado correctamente", colorExito);
         } else {
-            mensajeOperacion = "Error al crear el habitante. Intente de nuevo";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("Error al crear el habitante. Intente de nuevo", colorAdvertencia);
         }
 
         cambiarPane(pane_confirmacion, pane_entrada);
@@ -386,16 +382,12 @@ public class HabitanteController {
     //Eventos - Busqueda de habitantes
     public void operacionBuscar() {
         if (!in_idPersona.getText().isBlank() && !in_idPersona.getText().matches("[0-9]+")) {
-            this.mensajeOperacion = "El campo de Id de persona debe ser un numero";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("El campo de Id de persona debe ser un numero", colorAdvertencia);
             return;
         }
 
         if (!in_idVivienda.getText().isBlank() && !in_idVivienda.getText().matches("[0-9]+")) {
-            this.mensajeOperacion = "El campo de Id de vivienda debe ser un numero";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("El campo de Id de vivienda debe ser un numero", colorAdvertencia);
             return;
         }
 
@@ -417,15 +409,10 @@ public class HabitanteController {
         resultadoBusqueda = DBHabitante.buscarHabitantes(idPersona, idVivienda, rol);
 
         if (resultadoBusqueda == null) {
-            mensajeOperacion = "No se encontraron resultados";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("No se encontraron resultados", colorAdvertencia);
             return;
         } else {
             try {
-                mensajeOperacion = "Resultados encontrados: " + resultadoBusqueda.size();
-                out_infoOperacion.fillProperty().set(colorBlanco);
-
                 tabla_busquedaHabitante.getItems().clear();
                 for (Map<String, Object> fila : resultadoBusqueda) {
                     tabla_busquedaHabitante.getItems().add(fila);
@@ -435,7 +422,7 @@ public class HabitanteController {
             }
         }
 
-        mostrarInfoOperacion();
+        mostrarInfoOperacion("Resultados encontrados: " + resultadoBusqueda.size(), colorExito);
         cambiarPane(pane_entrada, pane_resultadoBusqueda);
     }
 
@@ -486,16 +473,24 @@ public class HabitanteController {
 
         boolean exito = DBHabitante.actualizarHabitante(idPersona, nuevaVivienda, nuevoRol);
         if(exito){
-            mensajeOperacion = "Habitante actualizado correctamente";
-            out_infoOperacion.fillProperty().set(colorExito);
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("Habitante actualizado correctamente", colorExito);
         }
         else{
-            mensajeOperacion = "Error al actualizar el habitante. Intente de nuevo";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
+            mostrarInfoOperacion("Error al actualizar el habitante. Intente de nuevo", colorAdvertencia);
         }
 
         cambiarPane(pane_actualizar, pane_entrada);
+    }
+
+    public void operacionBorrar() {
+        boolean exito = DBHabitante.borrarHabitante(habitanteBD.getIdPersona());
+        if(exito){
+            mostrarInfoOperacion("Habitante borrado correctamente", colorExito);
+        }
+        else{
+            mostrarInfoOperacion("Error al borrar el habitante. Intente de nuevo", colorAdvertencia);
+        }
+
+        cambiarPane(pane_confirmacion, pane_entrada);
     }
 }

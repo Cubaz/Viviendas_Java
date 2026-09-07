@@ -57,12 +57,27 @@ public class JDHabitante {
 
     public boolean actualizarHabitante(int idPersona, int nuevoIdVivienda, String nuevoRol){
         String sentencia = " UPDATE habitantes SET id_vivienda = ?, hab_rol = ? WHERE id_persona = ?";
-//        System.out.println(sentencia.toString());
 
         try(PreparedStatement ps = conexion.getConexion().prepareStatement(sentencia.toString())){
             ps.setInt(1, nuevoIdVivienda);
             ps.setString(2, nuevoRol);
             ps.setInt(3, idPersona);
+
+            ps.executeUpdate();
+        }
+        catch(SQLException e){
+            System.out.println("Error al actualizar habitante: " + e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean borrarHabitante(int idPersona){
+        String sentencia = " DELETE FROM habitantes WHERE id_persona = ?";
+
+        try(PreparedStatement ps = conexion.getConexion().prepareStatement(sentencia.toString())){
+            ps.setInt(1, idPersona);
 
             ps.executeUpdate();
         }
