@@ -173,11 +173,6 @@ public class ViviendaController {
         }
     }
 
-
-
-
-
-
     @FXML
     void buscar_vivienda(ActionEvent event) {
         if (criterio.getValue() == null || parametro.getText().isBlank()) {
@@ -239,7 +234,9 @@ public class ViviendaController {
         int numExt = Integer.parseInt(num_ext.getText());
         int numInt = Integer.parseInt(num_int.getText());
         float metros = Float.parseFloat(mts_cuadrados.getText());
-
+        int idPropietario = propietario.getValue().getIdPersona();
+        int idEdificio = edificio.getValue().getIdEdificio();
+        int numPiso = Integer.parseInt(piso.getText());
 
         CalleBD calleSeleccionada = calle.getValue();
         if (calleSeleccionada == null) {
@@ -250,9 +247,18 @@ public class ViviendaController {
         }
         int idCalle = calleSeleccionada.getId_calle();
 
-        boolean actualizado = VDB.actualizarVivienda(seleccionada.getId_vivienda(), tipo, numHab, numExt, numInt, idCalle, metros);
+        boolean viviendaActualizada = VDB.actualizarVivienda(seleccionada.getId_vivienda(), tipo, numHab, numExt, numInt, idCalle, metros);
+        boolean propietarioActualizado = PRDB.actualizarPropietario(seleccionada.getId_vivienda(), idPropietario);
+        boolean departamentoActualizado = true;
 
-        if (actualizado) {
+        if("Departamento".equals(tipo)){
+            DepartamentoBD dep = DDB.buscarDepartamentoVivienda(seleccionada.getId_vivienda());
+            if(dep != null) {
+                departamentoActualizado = DDB.actualizarDepartamento(dep.getId_departamento(), idEdificio, seleccionada.getId_vivienda(), numPiso);
+            }
+        }
+
+        if (viviendaActualizada && propietarioActualizado && departamentoActualizado) {
             mensajeOperacion = "Vivienda actualizada correctamente";
             out_infoOperacion.setFill(colorExito);
             buscar_vivienda(null);
@@ -338,7 +344,6 @@ public class ViviendaController {
 
                 }
             }
-
         });
     }
 
@@ -395,7 +400,7 @@ public class ViviendaController {
 
 
         if ("Departamento".equals(vivienda.getValue())) {
-            DepartamentoBD departamento = DDB.buscarDepartamento(idVivienda);
+            DepartamentoBD departamento = DDB.buscarDepartamentoVivienda(idVivienda);
             if (departamento != null) {
                 EdificioBD edificioBD = EDB.buscarEdificioID(departamento.getId_edificio());
                 edificio.setValue(edificioBD);

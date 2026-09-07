@@ -38,6 +38,25 @@ public class JDDepartamento {
         return -1;
     }
 
+    public DepartamentoBD buscarDepartamentoVivienda(int idVivienda){
+        String SQL = "SELECT * FROM departamento WHERE id_vivienda = ?";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            PS.setInt(1, idVivienda);
+            try(ResultSet RS = PS.executeQuery()){
+                if(RS.next()){
+                    int idDepartamento = RS.getInt("id_departamento");
+                    int idEdificio = RS.getInt("id_edificio");
+                    int piso = RS.getInt("dep_piso");
+
+                    return new DepartamentoBD(idDepartamento, idEdificio, idVivienda, piso);
+                }
+            }
+        }catch (SQLException e){
+            System.out.println("ERROR AL BUSCAR DEPARTAMENTO POR VIVIENDA " + e.getMessage());
+        }
+        return null;
+    }
+
     public DepartamentoBD buscarDepartamento(int idDepartamento){
         String SQL = "SELECT * FROM departamento WHERE id_departamento = ?";
         try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
@@ -45,14 +64,14 @@ public class JDDepartamento {
             try(ResultSet RS = PS.executeQuery()){
                 if(RS.next()){
                     int idEdificio = RS.getInt("id_edificio");
-                    int idVivienda = RS.getInt("id_vivienda");
                     int piso = RS.getInt("dep_piso");
+                    int idVivienda = RS.getInt("id_vivienda");
 
                     return new DepartamentoBD(idDepartamento, idEdificio, idVivienda, piso);
                 }
             }
         }catch (SQLException e){
-            System.out.println("ERROR AL BUSCAR DEPARTAMENTO " + e.getMessage());
+            System.out.println("ERROR AL BUSCAR DEPARTAMENTO POR VIVIENDA " + e.getMessage());
         }
         return null;
     }
