@@ -8,6 +8,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class JDEdificio {
     private Conexion CN = new Conexion();
 
@@ -22,7 +27,7 @@ public class JDEdificio {
                 if(rs.next()){
                     int idGenerado = rs.getInt(1);
                     System.out.println("REGISTRO DE EDIFICIO EXITOSO");
-                    System.out.println("SU ID DE EDIFICIO ES: " + idGenerado);
+                    return idGenerado;
                 }
             }
         }catch (SQLException e){
@@ -107,5 +112,44 @@ public class JDEdificio {
             System.out.println("ERROR AL ELIMINAR EDIFICIO: " + e.getMessage());
             return false;
         }
+    }
+
+    public ObservableList<Map<String, Object>> buscarEdificios(Integer idEdificio, String nombre) {
+        ObservableList<Map<String, Object>> datosEncontrados = FXCollections.observableArrayList();
+        String sentencia = construirSentenciaBuscarEdificios(idEdificio, nombre);
+
+        try (PreparedStatement ps = CN.getConexion().prepareStatement(sentencia)) {
+            int index = 1;
+            if (idEdificio != null) {
+                ps.setInt(index++, idEdificio);
+            }
+            if (nombre != null && !nombre.isEmpty()) {
+                ps.setString(index++, "%" + nombre + "%");
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> fila = new HashMap<>();
+                fila.put("IdEdificio", rs.getInt("id_edificio"));
+                fila.put("Nombre", rs.getString("edi_nombre"));
+                datosEncontrados.add(fila);
+            }
+            if (!datosEncontrados.isEmpty()) return datosEncontrados;
+        } catch (SQLException e) {
+            System.out.println("Error al consultar edificio: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public String construirSentenciaBuscarEdificios(Integer idEdificio, String nombre) {
+        StringBuilder sentencia = new StringBuilder("SELECT id_edificio, edi_nombre FROM edificio");
+        List<String> condiciones = new ArrayList<>();
+        if (idEdificio != null) condiciones.add("id_edificio = ?");
+        if (nombre != null && !nombre.isEmpty()) condiciones.add("edi_nombre LIKE ?");
+
+        if (!condiciones.isEmpty()) {
+            sentencia.append(" WHERE ").append(String.join(" AND ", condiciones));
+        }
+        return sentencia.toString();
     }
 }

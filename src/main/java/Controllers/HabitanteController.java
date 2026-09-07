@@ -17,18 +17,179 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.scene.paint.Color;
 
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
+
+
+enum operacion{
+    CREAR("Crear"),
+    BUSCAR("Buscar"),
+    BORRAR("Borrar"),
+    ACTUALIZAR("Seleccionar habitante");
+
+    private final String texto;
+
+    operacion(String texto){
+        this.texto = texto;
+    }
+
+    public String getTextoBoton(){
+        return this.texto;
+    }
+}
 
 public class HabitanteController {
-    //JavaFX - Crear habitante
-    @FXML private Button btn_cancelarAsignar;
-    @FXML private Button btn_confirmarAsignar;
-    @FXML private Button btn_preguntarAsignar;
-    @FXML private TextField in_idPersonaRegistro;
-    @FXML private TextField in_idViviendaRegistro;
+    //Componentes generales
+    @FXML private Button btn_menuPrincipal;
+    @FXML private AnchorPane pane_inicio;
+
     @FXML private Text out_infoOperacion;
+    @FXML private AnchorPane pane_entrada;
+    @FXML private TextField in_idPersona;
+    @FXML private Text txt_viviendaEntrada;
+    @FXML private TextField in_idVivienda;
+    @FXML private Text txt_rolEntrada;
+    @FXML private ComboBox<String> in_comboRol;
+    @FXML private Button btn_entrada;
+
+    @FXML private Button btn_confirmacion;
+    @FXML private AnchorPane pane_confirmacion;
+    @FXML private Button btn_volver;
+
+    //JavaFX - Eventos Generales
+    @FXML public void initialize() {
+        pane_actual = pane_inicio;
+
+        in_comboRol.getItems().addAll(
+                "Jefe Casa",
+                "Madre",
+                "Padre",
+                "Hija",
+                "Hijo",
+                "Sobrina",
+                "Sobrino",
+                "Otro"
+        );
+
+        combo_rolActualizar.getItems().addAll(
+                "Jefe Casa",
+                "Madre",
+                "Padre",
+                "Hija",
+                "Hijo",
+                "Sobrina",
+                "Sobrino",
+                "Otro"
+        );
+
+        configurarTablaBusqueda();
+        initPadrePane();
+    }
+
+    @FXML void elegirOpcionActualizar(ActionEvent event) {
+        opSeleccionada = operacion.ACTUALIZAR;
+        operacionSeleccionada();
+    }
+
+    @FXML void elegirOpcionBorrar(ActionEvent event) {
+        opSeleccionada = operacion.BORRAR;
+        operacionSeleccionada();
+    }
+
+    @FXML void elegirOpcionBuscar(ActionEvent event) {
+        opSeleccionada = operacion.BUSCAR;
+        operacionSeleccionada();
+    }
+
+    @FXML void elegirOpcionCrear(ActionEvent event) {
+        opSeleccionada = operacion.CREAR;
+        operacionSeleccionada();
+    }
+
+    @FXML void ejecutarOperacionEntrada(ActionEvent event) {
+        switch (opSeleccionada) {
+            case CREAR:
+                if(!validarCamposCorrectos()) return;
+
+                if(!existePersona(Integer.parseInt(in_idPersona.getText()))) return;
+                if(!existeVivienda(Integer.parseInt(in_idVivienda.getText()))) return;
+                calleBD = DBCalle.buscarCalleID(viviendaBD.getId_calle());
+
+                cargarPaneDatosHabitante();
+                btn_confirmacion.setText("Crear habitante");
+                cambiarPane(pane_entrada, pane_confirmacion);
+                break;
+
+            case BUSCAR:
+                tabla_busquedaHabitante.getItems().clear();
+                operacionBuscar();
+                break;
+
+            case ACTUALIZAR:
+                habitanteBD = DBHabitante.buscarHabitante(Integer.parseInt(in_idPersona.getText()));
+                if(habitanteBD == null){
+                    mostrarInfoOperacion("El habitante no existe", colorAdvertencia);
+                    cambiarPane(pane_actualizar, pane_entrada);
+                    return;
+                }
+
+                field_idPersonaActualizar.setText(in_idPersona.getText());
+                field_idViviendaActualizar.setText(Integer.toString(habitanteBD.getIdVivienda()));
+                combo_rolActualizar.getSelectionModel().select(habitanteBD.getRol());
+                out_infoOperacion.setVisible(false);
+
+                btn_confirmacion.setText("Actualizar");
+                cambiarPane(pane_entrada, pane_actualizar);
+                break;
+
+            case BORRAR:
+                habitanteBD = DBHabitante.buscarHabitante(Integer.parseInt(in_idPersona.getText()));
+                if(habitanteBD == null){
+                    mostrarInfoOperacion("El habitante no existe", colorAdvertencia);
+                    cambiarPane(pane_actualizar, pane_entrada);
+                    return;
+                }
+
+                if(!existePersona(Integer.parseInt(in_idPersona.getText()))) return;
+                if(!existeVivienda(habitanteBD.getIdVivienda())) return;
+                calleBD = DBCalle.buscarCalleID(viviendaBD.getId_calle());
+
+                out_infoOperacion.setVisible(false);
+                cargarPaneDatosHabitante();
+
+                btn_confirmacion.setText("Borrar habitante");
+                cambiarPane(pane_entrada, pane_confirmacion);
+                break;
+        }
+    }
+
+    @FXML void volverMenuPrincipal(ActionEvent event) {
+        //TODO: Cambiar de ventana
+    }
+
+    @FXML void volverVentanaAnterior(ActionEvent event) {
+        cambiarPane(pane_actual, padrePane.get(pane_actual));
+        out_infoOperacion.setVisible(false);
+
+        if (pane_actual == pane_inicio) btn_volver.setVisible(false);
+    }
+
+    @FXML void ejecutarOperacionConfirmacion(ActionEvent event) {
+        switch (opSeleccionada) {
+            case CREAR:
+                operacionCrear();
+                break;
+
+            case ACTUALIZAR:
+                operacionActualizar();
+                break;
+
+            case BORRAR:
+                operacionBorrar();
+                break;
+        }
+    }
+
+    //JavaFX - Crear habitante
     @FXML private TextField out_nombrePerRegistro;
     @FXML private TextField out_rol;
     @FXML private TextField out_rolRegistro;
@@ -36,30 +197,9 @@ public class HabitanteController {
     @FXML private TextField out_numExtRegistro;
     @FXML private TextField out_numIntRegistro;
     @FXML private TextField out_tipoVivRegistro;
-    @FXML private Button btn_asignarOtra;
-    @FXML private Button btn_volverInicio;
-    @FXML private ComboBox<String> in_comboRol;
-    @FXML private Text txt_idPersona;
-    @FXML private Text txt_idVivienda;
-
-    @FXML private Text txt_rol;
-    @FXML private Text txt_datosPersona;
-    @FXML private Separator separadorPersona;
-    @FXML private Text txt_nombrePerRegistro;
-    @FXML private Text txt_rolRegistro;
-    @FXML private Text txt_datosVivienda;
-    @FXML private Separator separadorVivienda;
-    @FXML private Text txt_nombreCalRegistro;
-    @FXML private Text txt_tipoVivRegistro;
-    @FXML private Text txt_numExtRegistro;
-    @FXML private Text txt_numIntRegistro;
-    @FXML private Text txt_confirmacion;
 
     //JavaFX - Busqueda de habitantes
-    @FXML private Button btn_buscar;
-    @FXML private Button btn_buscarOtro;
-    @FXML private AnchorPane pane_entradaBusqueda;
-    @FXML private AnchorPane pane_tablaBusqueda;
+    @FXML private AnchorPane pane_resultadoBusqueda;
     @FXML private TableView<Map<String, Object>> tabla_busquedaHabitante;
     @FXML private TableColumn<Map<String, Object>, Object> colIdPersona;
     @FXML private TableColumn<Map<String, Object>, Object> colNombre;
@@ -72,10 +212,17 @@ public class HabitanteController {
     @FXML private TableColumn<Map<String, Object>, Object> colIdCalle;
     @FXML private TableColumn<Map<String, Object>, Object> colNombreCalle;
 
+    //JavaFX - Actualizar habitante
+    @FXML private AnchorPane pane_actualizar;
+    @FXML private TextField field_idPersonaActualizar;
+    @FXML private TextField field_idViviendaActualizar;
+    @FXML private ComboBox<String> combo_rolActualizar;
+
+
+    //Componentes generales
     private final Color colorAdvertencia = new Color(1.0f, 1.0f, 0.0f, 1.0f);
     private final Color colorExito = new Color(0.0f, 1.0f, 0.1529f, 1.0f);
-    private final Color colorBlanco = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-    private String mensajeOperacion;
+    private operacion opSeleccionada;
 
     private PersonaBD personaBD;
     private ViviendaBD viviendaBD;
@@ -83,158 +230,133 @@ public class HabitanteController {
     private HabitanteBD habitanteBD;
     private ArrayList<HabitanteBD> habitantesBD;
 
-    private JDHabitante DBHabitante = new JDHabitante();
-    private JDPersona DBPersona = new JDPersona();
-    private JDVivienda DBVivienda = new JDVivienda();
-    private JDCalle DBCalle = new JDCalle();
+    private final JDHabitante DBHabitante = new JDHabitante();
+    private final JDPersona DBPersona = new JDPersona();
+    private final JDVivienda DBVivienda = new JDVivienda();
+    private final JDCalle DBCalle = new JDCalle();
+    private final Map<AnchorPane, AnchorPane> padrePane = new HashMap<>();
+    private AnchorPane pane_actual;
 
-    @FXML
-    public void initialize() {
-        in_comboRol.getItems().addAll(
-                "Jefe Casa",
-                "Madre",
-                "Padre",
-                "Hija",
-                "Hijo",
-                "Sobrina",
-                "Sobrino",
-                "Otro"
-        );
-
-        configurarTablaBusqueda();
+    //Eventos generales
+    public void mostrarInfoOperacion(String mensaje, Color color) {
+        out_infoOperacion.fillProperty().set(color);
+        out_infoOperacion.setText(mensaje);
+        out_infoOperacion.setVisible(true);
     }
 
-    //JavaFX - Eventos Crear habitante
-    @FXML
-    void preguntarAsignar(ActionEvent event) {
-        if(!validarCamposCorrectos()) return;
-
-        int idPersona = Integer.parseInt(in_idPersonaRegistro.getText());
-        int idVivienda = Integer.parseInt(in_idViviendaRegistro.getText());
-        String rol = in_comboRol.getValue();
-
-        if(!consultarDatosHabitante(idPersona, idVivienda, rol)) return;
-
-        mostrarDatos();
-        invertirCamposEntrada();
-        invertirCamposMostrarDatos();
-    }
-
-    @FXML
-    void asignarHabitante(ActionEvent event) {
-        DBHabitante.insertarHabitante(habitanteBD.getIdPersona(), habitanteBD.getIdVivienda(), habitanteBD.getRol());
-
-        out_infoOperacion.setText("Habitante asignado correctamente");
-
-        invertirCamposMostrarDatos();
-        invertirCamposFinales();
-    }
-
-    @FXML
-    void cancelarAsignar(ActionEvent event) {
-        in_idPersonaRegistro.clear();
-        in_idViviendaRegistro.clear();
-        in_comboRol.setValue(null);
-        invertirCamposMostrarDatos();
-        invertirCamposEntrada();
-    }
-
-    @FXML
-    void asignarOtraVivienda(ActionEvent event) {
-        in_idPersonaRegistro.clear();
-        in_idViviendaRegistro.clear();
-        in_comboRol.setValue(null);
-        invertirCamposFinales();
-        invertirCamposEntrada();
-    }
-
-    //JavaFX - Eventos Busqueda de habitantes
-    @FXML
-    void buscarHabitante(ActionEvent event) {
-        if(!in_idPersonaRegistro.getText().isBlank() && !in_idPersonaRegistro.getText().matches("[0-9]+")){
-            this.mensajeOperacion = "El campo de Id de persona debe ser un numero";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
-            return;
+    public boolean validarIdPersona(TextField in_idPersona) {
+        if (in_idPersona.getText().isBlank()) {
+            mostrarInfoOperacion("El campo de Id de persona es necesario", colorAdvertencia);
+            return false;
         }
 
-        if(!in_idViviendaRegistro.getText().isBlank() && !in_idViviendaRegistro.getText().matches("[0-9]+")){
-            this.mensajeOperacion = "El campo de Id de vivienda debe ser un numero";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
-            return;
+        if (!in_idPersona.getText().matches("[0-9]+")) {
+            mostrarInfoOperacion("El campo de Id de persona debe ser un numero", colorAdvertencia);
+            return false;
         }
 
-        ObservableList<Map<String, Object>> resultadoBusqueda = null;
-        Integer idPersona = null;
-        Integer idVivienda = null;
-        String rol = null;
+        return true;
+    }
 
-        if(validarIdPersona()) idPersona = Integer.parseInt(in_idPersonaRegistro.getText());
-        if(validarIdVivienda()) idVivienda = Integer.parseInt(in_idViviendaRegistro.getText());
-        if(validarRol()) rol = in_comboRol.getValue();
-
-        resultadoBusqueda = DBHabitante.buscarHabitantes(idPersona, idVivienda, rol);
-
-        if(resultadoBusqueda == null){
-            mensajeOperacion = "No se encontraron resultados";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-        }
-        else{
-            try{
-                mensajeOperacion = "Resultados encontrados: " + resultadoBusqueda.size();
-                out_infoOperacion.fillProperty().set(colorBlanco);
-
-                tabla_busquedaHabitante.getItems().clear();
-                for(Map<String, Object> fila : resultadoBusqueda){
-                    tabla_busquedaHabitante.getItems().add(fila);
-                }
-            }
-            catch(Exception e){
-                System.out.println("Error al obtener datos de la tabla: " + e.getMessage());
-            }
+    public boolean validarIdVivienda(TextField in_idVivienda) {
+        if (in_idVivienda.getText().isBlank()) {
+            mostrarInfoOperacion("El campo de Id de vivienda es necesario", colorAdvertencia);
+            return false;
         }
 
-        mostrarInfoOperacion();
-        pane_tablaBusqueda.setVisible(true);
-        pane_entradaBusqueda.setVisible(false);
+        if (!in_idVivienda.getText().matches("[0-9]+")) {
+            mostrarInfoOperacion("El campo de Id de vivienda debe ser un numero", colorAdvertencia);
+            return false;
+        }
+
+        return true;
     }
 
-    @FXML
-    void buscarOtroHabitante(ActionEvent event) {
-        in_idPersonaRegistro.clear();
-        in_idViviendaRegistro.clear();
-        in_comboRol.setValue(null);
-        tabla_busquedaHabitante.getItems().clear();
+    public boolean validarRol(ComboBox<String> in_comboRol) {
+        if (in_comboRol.getValue() == null) {
+            mostrarInfoOperacion("El campo de rol es necesario", colorAdvertencia);
+            return false;
+        }
 
-        out_infoOperacion.setVisible(false);
-        pane_tablaBusqueda.setVisible(false);
-        pane_entradaBusqueda.setVisible(true);
+        return true;
     }
 
-    //JavaFX - Eventos Generales
-    @FXML
-    void volverInicio(ActionEvent event) {
-        //TODO: Cambiar de ventana
+    public boolean existePersona(int idPersona) {
+        personaBD = DBPersona.buscarPersonaID(idPersona);
+        if (personaBD == null) {
+            mostrarInfoOperacion("La persona no existe", colorAdvertencia);
+            return false;
+        }
+
+        return true;
     }
 
+    public boolean existeVivienda(int idVivienda) {
+        viviendaBD = DBVivienda.buscarVivienda(idVivienda);
+        if (viviendaBD == null) {
+            mostrarInfoOperacion("La vivienda no existe", colorAdvertencia);
+            return false;
+        }
+
+        return true;
+    }
+
+    public void cargarPaneDatosHabitante() {
+        out_nombrePerRegistro.setText(personaBD.getNombre());
+        out_rolRegistro.setText(habitanteBD != null ? habitanteBD.getRol() : in_comboRol.getValue());
+        out_tipoVivRegistro.setText(viviendaBD.getTipo());
+        out_nombreCalRegistro.setText(calleBD.getNombre());
+        out_numExtRegistro.setText(String.valueOf(viviendaBD.getNum_ext()));
+        out_numIntRegistro.setText(String.valueOf(viviendaBD.getNum_int()).equals("0") ? "S/N" : String.valueOf(viviendaBD.getNum_int()));
+    }
+
+    public void initPadrePane() {
+        padrePane.put(pane_inicio, pane_inicio);
+        padrePane.put(pane_entrada, pane_inicio);
+
+        padrePane.put(pane_confirmacion, pane_entrada);
+        padrePane.put(pane_actualizar, pane_entrada);
+
+        padrePane.put(pane_resultadoBusqueda, pane_entrada);
+    }
+
+    public void cambiarPane(AnchorPane origen, AnchorPane destino) {
+        origen.setVisible(false);
+        destino.setVisible(true);
+        pane_actual = destino;
+    }
+
+    public void operacionSeleccionada() {
+        btn_entrada.setText(opSeleccionada.getTextoBoton());
+
+        in_idPersona.clear();
+        in_idVivienda.clear();
+        in_comboRol.getSelectionModel().clearSelection();
+
+        in_idVivienda.setVisible(opSeleccionada.ordinal() < 2);
+        txt_viviendaEntrada.setVisible(opSeleccionada.ordinal() < 2);
+        in_comboRol.setVisible(opSeleccionada.ordinal() < 2);
+        txt_rolEntrada.setVisible(opSeleccionada.ordinal() < 2);
+
+        cambiarPane(pane_inicio, pane_entrada);
+        btn_volver.setVisible(true);
+    }
+
+    //Eventos - Creacion de habitante
     public boolean validarCamposCorrectos() {
         out_infoOperacion.fillProperty().set(colorAdvertencia);
 
-        if(!validarIdPersona()){
-            mostrarInfoOperacion();
-            in_idPersonaRegistro.requestFocus();
+        if (!validarIdPersona(in_idPersona)) {
+            in_idPersona.requestFocus();
             return false;
         }
 
-        if(!validarIdVivienda()){
-            mostrarInfoOperacion();
-            in_idViviendaRegistro.requestFocus();
+        if (!validarIdVivienda(in_idVivienda)) {
+            in_idVivienda.requestFocus();
             return false;
         }
 
-        if(!validarRol()){
-            mostrarInfoOperacion();
+        if (!validarRol(in_comboRol)) {
             in_comboRol.requestFocus();
             return false;
         }
@@ -242,141 +364,66 @@ public class HabitanteController {
         return true;
     }
 
-    public boolean validarIdPersona(){
-        out_infoOperacion.fillProperty().set(colorAdvertencia);
+    public void operacionCrear() {
+        boolean resultado = DBHabitante.insertarHabitante(Integer.parseInt(in_idPersona.getText()), Integer.parseInt(in_idVivienda.getText()), in_comboRol.getValue());
 
-        if(in_idPersonaRegistro.getText().isBlank()){
-            this.mensajeOperacion = "El campo de Id de persona es necesario";
-
-            return false;
+        if(resultado) {
+            in_idPersona.clear();
+            in_idVivienda.clear();
+            in_comboRol.getSelectionModel().clearSelection();
+            mostrarInfoOperacion("Habitante creado correctamente", colorExito);
+        } else {
+            mostrarInfoOperacion("Error al crear el habitante. Intente de nuevo", colorAdvertencia);
         }
 
-        if(!in_idPersonaRegistro.getText().matches("[0-9]+")){
-            this.mensajeOperacion = "El campo de Id de persona debe ser un numero";
+        cambiarPane(pane_confirmacion, pane_entrada);
+    }
 
-            return false;
+    //Eventos - Busqueda de habitantes
+    public void operacionBuscar() {
+        if (!in_idPersona.getText().isBlank() && !in_idPersona.getText().matches("[0-9]+")) {
+            mostrarInfoOperacion("El campo de Id de persona debe ser un numero", colorAdvertencia);
+            return;
         }
 
-        return true;
-    }
-
-    public boolean validarIdVivienda(){
-        out_infoOperacion.fillProperty().set(colorAdvertencia);
-
-        if(in_idViviendaRegistro.getText().isBlank()){
-            this.mensajeOperacion = "El campo de Id de vivienda es necesario";
-
-            return false;
+        if (!in_idVivienda.getText().isBlank() && !in_idVivienda.getText().matches("[0-9]+")) {
+            mostrarInfoOperacion("El campo de Id de vivienda debe ser un numero", colorAdvertencia);
+            return;
         }
 
-        if(!in_idViviendaRegistro.getText().matches("[0-9]+")){
-            this.mensajeOperacion = "El campo de Id de vivienda debe ser un numero";
+        ObservableList<Map<String, Object>> resultadoBusqueda = null;
+        Integer idPersona = null;
+        Integer idVivienda = null;
+        String rol = in_comboRol.getValue();
 
-            return false;
+        if (validarIdPersona(in_idPersona)) {
+            idPersona = Integer.parseInt(in_idPersona.getText());
+            if (!existePersona(idPersona)) return;
+        }
+        if (validarIdVivienda(in_idVivienda)) {
+            idVivienda = Integer.parseInt(in_idVivienda.getText());
+            if (!existeVivienda(idVivienda)) return;
+
         }
 
-        return true;
-    }
+        resultadoBusqueda = DBHabitante.buscarHabitantes(idPersona, idVivienda, rol);
 
-    public boolean validarRol(){
-        out_infoOperacion.fillProperty().set(colorAdvertencia);
-
-        if(in_comboRol.getValue() == null){
-            this.mensajeOperacion = "El campo de rol es necesario";
-            return false;
+        if (resultadoBusqueda == null) {
+            mostrarInfoOperacion("No se encontraron resultados", colorAdvertencia);
+            return;
+        } else {
+            try {
+                tabla_busquedaHabitante.getItems().clear();
+                for (Map<String, Object> fila : resultadoBusqueda) {
+                    tabla_busquedaHabitante.getItems().add(fila);
+                }
+            } catch (Exception e) {
+                System.out.println("Error al obtener datos de la tabla: " + e.getMessage());
+            }
         }
 
-        return true;
-    }
-
-    public void mostrarInfoOperacion(){
-        out_infoOperacion.setText(this.mensajeOperacion);
-        out_infoOperacion.setVisible(true);
-    }
-
-    public boolean consultarDatosHabitante(int idPersona, int idVivienda, String rol){
-        personaBD = DBPersona.buscarPersonaID(idPersona);
-        if(personaBD == null){
-            System.out.println("La persona no existe");
-            return false;
-        }
-
-        viviendaBD = DBVivienda.buscarVivienda(idVivienda);
-        if(viviendaBD == null){
-            System.out.println("La vivienda no existe");
-            return false;
-        }
-
-    calleBD = DBCalle.buscarCalleID(viviendaBD.getIdCalle());
-        if(calleBD == null){
-            System.out.println("La calle no existe");
-            return false;
-        }
-
-        habitanteBD = new HabitanteBD(idPersona, idVivienda, rol);
-
-        return true;
-    }
-
-    public void invertirCamposEntrada(){
-        txt_idPersona.setVisible(!txt_idPersona.isVisible());
-        txt_idVivienda.setVisible(!txt_idVivienda.isVisible());
-        txt_rol.setVisible(!txt_rol.isVisible());
-
-        btn_preguntarAsignar.setVisible(!btn_preguntarAsignar.isVisible());
-        in_idPersonaRegistro.setVisible(!in_idPersonaRegistro.isVisible());
-        in_idViviendaRegistro.setVisible(!in_idViviendaRegistro.isVisible());
-        in_comboRol.setVisible(!in_comboRol.isVisible());
-
-        btn_preguntarAsignar.setDisable(!btn_preguntarAsignar.isDisable());
-        in_idPersonaRegistro.setDisable(!in_idPersonaRegistro.isDisable());
-        in_idViviendaRegistro.setDisable(!in_idViviendaRegistro.isDisable());
-        in_comboRol.setDisable(!in_comboRol.isDisable());
-    }
-
-    public void invertirCamposMostrarDatos(){
-        txt_datosPersona.setVisible(!txt_datosPersona.isVisible());
-        separadorPersona.setVisible(!separadorPersona.isVisible());
-        txt_nombrePerRegistro.setVisible(!txt_nombrePerRegistro.isVisible());
-        txt_rolRegistro.setVisible(!txt_rolRegistro.isVisible());
-        txt_datosVivienda.setVisible(!txt_datosVivienda.isVisible());
-        separadorVivienda.setVisible(!separadorVivienda.isVisible());
-        txt_nombreCalRegistro.setVisible(!txt_nombreCalRegistro.isVisible());
-        txt_tipoVivRegistro.setVisible(!txt_tipoVivRegistro.isVisible());
-        txt_numExtRegistro.setVisible(!txt_numExtRegistro.isVisible());
-        txt_numIntRegistro.setVisible(!txt_numIntRegistro.isVisible());
-        txt_confirmacion.setVisible(!txt_confirmacion.isVisible());
-
-        btn_cancelarAsignar.setVisible(!btn_cancelarAsignar.isVisible());
-        btn_confirmarAsignar.setVisible(!btn_confirmarAsignar.isVisible());
-        out_nombrePerRegistro.setVisible(!out_nombrePerRegistro.isVisible());
-        out_rolRegistro.setVisible(!out_rolRegistro.isVisible());
-        out_nombreCalRegistro.setVisible(!out_nombreCalRegistro.isVisible());
-        out_numExtRegistro.setVisible(!out_numExtRegistro.isVisible());
-        out_numIntRegistro.setVisible(!out_numIntRegistro.isVisible());
-        out_tipoVivRegistro.setVisible(!out_tipoVivRegistro.isVisible());
-
-        btn_cancelarAsignar.setDisable(!btn_cancelarAsignar.isDisable());
-        btn_confirmarAsignar.setDisable(!btn_confirmarAsignar.isDisable());
-    }
-
-    public void invertirCamposFinales(){
-        out_infoOperacion.fillProperty().set(colorExito);
-        out_infoOperacion.setVisible(!out_infoOperacion.isVisible());
-        btn_asignarOtra.setVisible(!btn_asignarOtra.isVisible());
-        btn_volverInicio.setVisible(!btn_volverInicio.isVisible());
-
-        btn_asignarOtra.setDisable(!btn_asignarOtra.isDisable());
-        btn_volverInicio.setDisable(!btn_volverInicio.isDisable());
-    }
-
-    public void mostrarDatos() {
-        out_nombrePerRegistro.setText(personaBD.getNombre());
-        out_rolRegistro.setText(habitanteBD.getRol());
-        out_tipoVivRegistro.setText(viviendaBD.getTipo());
-        out_nombreCalRegistro.setText(calleBD.getNombre());
-        out_numExtRegistro.setText(String.valueOf(viviendaBD.getNum_ext()));
-        out_numIntRegistro.setText(String.valueOf(viviendaBD.getNum_int()).equals("0") ? "S/N" : String.valueOf(viviendaBD.getNum_int()));
+        mostrarInfoOperacion("Resultados encontrados: " + resultadoBusqueda.size(), colorExito);
+        cambiarPane(pane_entrada, pane_resultadoBusqueda);
     }
 
     private void configurarTablaBusqueda() {
@@ -409,5 +456,41 @@ public class HabitanteController {
 
         colNombreCalle.setCellValueFactory(data ->
                 new SimpleObjectProperty<>(data.getValue().get("Calle")));
+    }
+
+    //Eventos - Actualizar habitante
+    public void operacionActualizar() {
+        int idPersona = Integer.parseInt(field_idPersonaActualizar.getText());
+
+        if(!validarIdVivienda(field_idViviendaActualizar)) return;
+        if(!validarRol(combo_rolActualizar)) return;
+
+        int nuevaVivienda = Integer.parseInt(field_idViviendaActualizar.getText());
+        String nuevoRol = combo_rolActualizar.getValue();
+
+        if(!validarIdVivienda(field_idViviendaActualizar) || !existeVivienda(nuevaVivienda)) return;
+        if(!validarRol(combo_rolActualizar)) return;
+
+        boolean exito = DBHabitante.actualizarHabitante(idPersona, nuevaVivienda, nuevoRol);
+        if(exito){
+            mostrarInfoOperacion("Habitante actualizado correctamente", colorExito);
+        }
+        else{
+            mostrarInfoOperacion("Error al actualizar el habitante. Intente de nuevo", colorAdvertencia);
+        }
+
+        cambiarPane(pane_actualizar, pane_entrada);
+    }
+
+    public void operacionBorrar() {
+        boolean exito = DBHabitante.borrarHabitante(habitanteBD.getIdPersona());
+        if(exito){
+            mostrarInfoOperacion("Habitante borrado correctamente", colorExito);
+        }
+        else{
+            mostrarInfoOperacion("Error al borrar el habitante. Intente de nuevo", colorAdvertencia);
+        }
+
+        cambiarPane(pane_confirmacion, pane_entrada);
     }
 }
