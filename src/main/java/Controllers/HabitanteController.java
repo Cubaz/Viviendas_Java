@@ -307,7 +307,7 @@ public class HabitanteController {
             return false;
         }
 
-        calleBD = DBCalle.buscarCalleID(viviendaBD.getId_calle());
+    calleBD = DBCalle.buscarCalleID(viviendaBD.getIdCalle());
         if(calleBD == null){
             System.out.println("La calle no existe");
             return false;

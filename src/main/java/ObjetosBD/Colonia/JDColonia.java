@@ -3,6 +3,8 @@ import ObjetosBD.Conexion;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,39 +53,44 @@ public class JDColonia {
         return lista;
     }
 
-    public ColoniaBD buscarColoniaID(int idColonia){
-        String SQL = "SELECT * FROM colonia WHERE id_colonia = ?";
-        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
-            PS.setInt(1, idColonia);
-            try(ResultSet RS = PS.executeQuery()){
-                if(RS.next()){
-                    String nombre = RS.getString("col_nombre");
+    public ObservableList<ColoniaBD> buscarColoniaID(int idColonia){
+        ObservableList<ColoniaBD> lista = FXCollections.observableArrayList();
+        String SQL = "SELECT * FROM colonia WHERE id_colonia LIKE ?";
 
-                    return new ColoniaBD(idColonia, nombre);
-                }
-            }
-        }catch (SQLException e){
-            System.out.println("ERROR AL BUSCAR COLONIA POR ID: " + e.getMessage());
-        }
-        return null;
-    }
-
-    public ColoniaBD buscarColoniaNombre(String nombreColonia){
-        String SQL = "SELECT * FROM colonia WHERE col_nombre LIKE ?";
-        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
-            PS.setString(1, "%" + nombreColonia + "%");
-            try(ResultSet RS = PS.executeQuery()){
-                if(RS.next()){
+        try (PreparedStatement PS = CN.getConexion().prepareStatement(SQL)) {
+            PS.setString(1, "%" + idColonia + "%");
+            try (ResultSet RS = PS.executeQuery()) {
+                while (RS.next()) {
                     int id = RS.getInt("id_colonia");
                     String nombre = RS.getString("col_nombre");
-
-                    return new ColoniaBD(id, nombre);
+                    lista.add(new ColoniaBD(id, nombre));
                 }
             }
-        }catch (SQLException e){
-            System.out.println("ERROR AL BUSCAR COLONIA POR NOMBRE: " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("ERROR AL BUSCAR COLONIAS POR NOMBRE: " + e.getMessage());
         }
-        return null;
+
+        return lista;
+    }
+
+    public ObservableList<ColoniaBD> buscarColoniaNombre(String nombreColonia){
+        ObservableList<ColoniaBD> lista = FXCollections.observableArrayList();
+        String SQL = "SELECT * FROM colonia WHERE col_nombre LIKE ?";
+
+        try (PreparedStatement PS = CN.getConexion().prepareStatement(SQL)) {
+            PS.setString(1, "%" + nombreColonia + "%");
+            try (ResultSet RS = PS.executeQuery()) {
+                while (RS.next()) {
+                    int id = RS.getInt("id_colonia");
+                    String nombre = RS.getString("col_nombre");
+                    lista.add(new ColoniaBD(id, nombre));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("ERROR AL BUSCAR COLONIAS POR NOMBRE: " + e.getMessage());
+        }
+
+        return lista;
     }
 
     public boolean actualizarColonia(int idColonia, String nombreColonia, float metrosCuadrados){
