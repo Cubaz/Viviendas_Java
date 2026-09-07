@@ -52,39 +52,44 @@ public class JDFamilia {
         return lista;
     }
 
-    public FamiliaBD buscarFamiliaID(int idFamilia){
-        String SQL = "SELECT * FROM familia WHERE id_familia = ?";
-        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
-            PS.setInt(1, idFamilia);
-            try(ResultSet RS = PS.executeQuery()){
-                if(RS.next()){
-                    String fam_apellidos = RS.getString("fam_apellidos");
+    public ObservableList<FamiliaBD> buscarFamiliaID(int idFamilia){
+        ObservableList<FamiliaBD> lista = FXCollections.observableArrayList();
+        String SQL = "SELECT * FROM familia WHERE id_familia LIKE ?";
 
-                    return new FamiliaBD(idFamilia, fam_apellidos);
+        try (PreparedStatement PS = CN.getConexion().prepareStatement(SQL)) {
+            PS.setString(1, "%" + idFamilia + "%");
+            try (ResultSet RS = PS.executeQuery()) {
+                while (RS.next()) {
+                    int id = RS.getInt("id_familia");
+                    String apellido = RS.getString("fam_apellidos");
+                    lista.add(new FamiliaBD(id, apellido));
                 }
             }
         } catch (SQLException e) {
-            System.out.println("ERROR AL BUSCAR FAMILIA POR ID: " + e.getMessage());
+            System.out.println("ERROR AL BUSCAR FAMILIAS POR ID: " + e.getMessage());
         }
-        return null;
+
+        return lista;
     }
 
-    public FamiliaBD buscarFamiliaApellidos(String apellidosFamilia){
+    public ObservableList<FamiliaBD> buscarFamiliaApellidos(String apellidos){
+        ObservableList<FamiliaBD> lista = FXCollections.observableArrayList();
         String SQL = "SELECT * FROM familia WHERE fam_apellidos LIKE ?";
-        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
-            PS.setString(1, "%" + apellidosFamilia + "%");
-            try(ResultSet RS = PS.executeQuery()){
-                if(RS.next()){
-                    int id = RS.getInt("id_familia");
-                    String apellidos = RS.getString("fam_apellidos");
 
-                    return new FamiliaBD(id, apellidos);
+        try (PreparedStatement PS = CN.getConexion().prepareStatement(SQL)) {
+            PS.setString(1, "%" + apellidos + "%");
+            try (ResultSet RS = PS.executeQuery()) {
+                while (RS.next()) {
+                    int id = RS.getInt("id_familia");
+                    String apellido = RS.getString("fam_apellidos");
+                    lista.add(new FamiliaBD(id, apellido));
                 }
             }
-        }catch (SQLException e){
-            System.out.println("ERROR AL BUSCAR POR APELLIDOS: " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("ERROR AL BUSCAR FAMILIAS POR NOMBRE: " + e.getMessage());
         }
-        return null;
+
+        return lista;
     }
 
     public boolean actualizarFamilia(int idFamilia, String apellidos){

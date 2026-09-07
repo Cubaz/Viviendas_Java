@@ -34,7 +34,7 @@ public class ViviendaBD {
     public  int getNum_int(){return num_int;}
     public void setNum_int(int num_int){this.num_int = num_int;}
 
-    public int getId_calle(){return id_calle;}
+    public int getIdCalle(){return id_calle;}
     public void setId_calle(int id_calle){this.id_calle = id_calle;}
 
     public float getMts_cuadrados(){return mts_cuadrados;}

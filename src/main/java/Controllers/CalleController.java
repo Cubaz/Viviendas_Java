@@ -1,12 +1,17 @@
 package Controllers;
 
+import ObjetosBD.Calle.CalleBD;
 import ObjetosBD.Calle.JDCalle;
 import ObjetosBD.Colonia.ColoniaBD;
 import ObjetosBD.Colonia.JDColonia;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 
 public class CalleController {
     private JDCalle FDC;
@@ -14,12 +19,84 @@ public class CalleController {
 
     @FXML private TextField nom_calle;
     @FXML private ComboBox<ColoniaBD> combo_colonia;
+    @FXML private TableColumn<CalleBD, Integer> colIdCalle;
+    @FXML private TableColumn<CalleBD, Integer> colIdColonia;
+    @FXML private TableColumn<CalleBD, String> colNombreCalle;
+    @FXML private Button confirmar;
+    @FXML private ComboBox<String> criterio;
+
+    @FXML private Text out_infoOperacion;
+    @FXML private TextField parametro;
+    @FXML private TableView<CalleBD> tabla_calle;
+    @FXML private Text texto_calle;
+
+    private final Color colorAdvertencia = new Color(1.0f, 1.0f, 0.0f, 1.0f);
+    private final Color colorExito = new Color(0.0f, 1.0f, 0.1529f, 1.0f);
+    private final Color colorBlanco = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+    private String mensajeOperacion;
+
+
+
+    @FXML
+    void eliminar_calle(ActionEvent event) {
+        CalleBD seleccionada = tabla_calle.getSelectionModel().getSelectedItem();
+
+        if (seleccionada == null) {
+            mensajeOperacion = "Debe seleccionar una calle para eliminar";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+            mostrarInfoOperacion();
+            return;
+        }
+
+
+        boolean eliminado = FDC.eliminarCalle(seleccionada.getId_calle());
+
+        if (eliminado) {
+            mensajeOperacion = "Colonia eliminada correctamente";
+            out_infoOperacion.fillProperty().set(colorExito);
+
+
+            buscar_calle(null);
+
+
+            nom_calle.clear();
+        } else {
+            mensajeOperacion = "No se pudo eliminar la colonia";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+        }
+
+        mostrarInfoOperacion();
+
+
+    }
 
     @FXML
     void initialize(){
         FDC = new JDCalle();
         DBColonia = new JDColonia();
         combo_colonia.setItems(DBColonia.obtenerColonias());
+
+        criterio.getItems().addAll("ID", "Nombre");
+        configurarTablaBusqueda();
+        tabla_calle.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                CalleBD seleccionada = tabla_calle.getSelectionModel().getSelectedItem();
+                if (seleccionada != null) {
+                    // Llenar el campo de nombre de la calle
+                    nom_calle.setText(seleccionada.getNombre());
+
+                    // Seleccionar la colonia asociada en el ComboBox
+                    for (ColoniaBD colonia : combo_colonia.getItems()) {
+                        if (colonia.getId_colonia() == seleccionada.getId_colonia()) {
+                            combo_colonia.setValue(colonia); // selecciona la colonia en el ComboBox
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+
+
     }
 
     @FXML
@@ -52,4 +129,111 @@ public class CalleController {
             System.out.println("Error en el registro de CALLE");
         }
     }
+
+    @FXML
+    void actualizar_calle(ActionEvent event) {
+        CalleBD seleccionada = tabla_calle.getSelectionModel().getSelectedItem();
+
+        if (seleccionada == null) {
+            mensajeOperacion = "Debe seleccionar una calle con doble clic";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+            mostrarInfoOperacion();
+            return;
+        }
+
+        if (colNombreCalle.getText().isBlank()) {
+            mensajeOperacion = "El nombre no puede estar vacío";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+            mostrarInfoOperacion();
+            return;
+        }
+
+        // 🔹 Obtener colonia seleccionada en el ComboBox
+        ColoniaBD coloniaSeleccionada = (ColoniaBD) combo_colonia.getValue();
+        if (coloniaSeleccionada == null) {
+            mensajeOperacion = "Debe seleccionar una colonia en el ComboBox";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+            mostrarInfoOperacion();
+            return;
+        }
+
+        int idcolonia = coloniaSeleccionada.getId_colonia();
+
+        // 🔹 Ejecutar UPDATE
+        boolean actualizado = FDC.actualizarCalle(seleccionada.getId_calle(), nom_calle.getText(), idcolonia);
+
+        if (actualizado) {
+            mensajeOperacion = "Calle actualizada correctamente";
+            out_infoOperacion.fillProperty().set(colorExito);
+
+            // Refrescar tabla
+            buscar_calle(null);
+        } else {
+            mensajeOperacion = "No se pudo actualizar la calle";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+        }
+
+        mostrarInfoOperacion();
+    }
+
+
+    @FXML
+    void buscar_calle(ActionEvent event) {
+        tabla_calle.getItems().clear();
+
+        if (criterio.getValue() == null || criterio.getValue().isBlank()) {
+            mensajeOperacion = "Debe descoger un criterio de búsqueda";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+            mostrarInfoOperacion();
+            return;
+        }
+
+        if (parametro.getText().isBlank()) {
+            mensajeOperacion = "Debe escribir un parámetro de búsqueda";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+            mostrarInfoOperacion();
+            return;
+        }
+
+        ObservableList<CalleBD> resultadoBusqueda = FXCollections.observableArrayList();
+
+        if(criterio.getValue().equals("ID")){
+            int busqueda = Integer.parseInt(parametro.getText());
+            resultadoBusqueda = FDC.buscarCalleIDTABLA(busqueda);
+            if(resultadoBusqueda.isEmpty()){
+                mensajeOperacion = "No se encontraron resultados";
+                out_infoOperacion.fillProperty().set(colorAdvertencia);
+            } else {
+                mensajeOperacion = "Resultados encontrados: " + resultadoBusqueda.size();
+                out_infoOperacion.fillProperty().set(colorBlanco);
+                tabla_calle.setItems(resultadoBusqueda);
+            }
+        } else if(criterio.getValue().equals("Nombre")){
+            resultadoBusqueda = FDC.buscarCalleaNombre(parametro.getText());
+            if(resultadoBusqueda.isEmpty()){
+                mensajeOperacion = "No se encontraron resultados";
+                out_infoOperacion.fillProperty().set(colorAdvertencia);
+            } else {
+                mensajeOperacion = "Resultados encontrados: " + resultadoBusqueda.size();
+                out_infoOperacion.fillProperty().set(colorBlanco);
+                tabla_calle.setItems(resultadoBusqueda);
+            }
+        }
+
+        mostrarInfoOperacion();
+
+    }
+
+
+    public void mostrarInfoOperacion(){
+        out_infoOperacion.setText(this.mensajeOperacion);
+        out_infoOperacion.setVisible(true);
+    }
+
+    private void configurarTablaBusqueda(){
+        colIdCalle.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getId_calle()));
+        colNombreCalle.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getNombre()));
+        colIdColonia.setCellValueFactory(data-> new SimpleObjectProperty<>(data.getValue().getId_colonia()));
+    }
+
 }
