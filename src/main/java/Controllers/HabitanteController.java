@@ -24,7 +24,7 @@ enum operacion{
     CREAR("Crear"),
     BUSCAR("Buscar"),
     BORRAR("Borrar"),
-    ACTUALIZAR("Actualizar");
+    ACTUALIZAR("Seleccionar habitante");
 
     private final String texto;
 
@@ -32,7 +32,7 @@ enum operacion{
         this.texto = texto;
     }
 
-    public String getTexto(){
+    public String getTextoBoton(){
         return this.texto;
     }
 }
@@ -45,7 +45,9 @@ public class HabitanteController {
     @FXML private Text out_infoOperacion;
     @FXML private AnchorPane pane_entrada;
     @FXML private TextField in_idPersona;
+    @FXML private Text txt_viviendaEntrada;
     @FXML private TextField in_idVivienda;
+    @FXML private Text txt_rolEntrada;
     @FXML private ComboBox<String> in_comboRol;
     @FXML private Button btn_entrada;
 
@@ -58,6 +60,17 @@ public class HabitanteController {
         pane_actual = pane_inicio;
 
         in_comboRol.getItems().addAll(
+                "Jefe Casa",
+                "Madre",
+                "Padre",
+                "Hija",
+                "Hijo",
+                "Sobrina",
+                "Sobrino",
+                "Otro"
+        );
+
+        combo_rolActualizar.getItems().addAll(
                 "Jefe Casa",
                 "Madre",
                 "Padre",
@@ -112,6 +125,22 @@ public class HabitanteController {
                 break;
 
             case ACTUALIZAR:
+                habitanteBD = DBHabitante.buscarHabitante(Integer.parseInt(in_idPersona.getText()));
+                if(habitanteBD == null){
+                    mensajeOperacion = "El habitante no existe";
+                    out_infoOperacion.fillProperty().set(colorAdvertencia);
+                    mostrarInfoOperacion();
+                    cambiarPane(pane_actualizar, pane_entrada);
+                    return;
+                }
+
+                field_idPersonaActualizar.setText(in_idPersona.getText());
+                field_idViviendaActualizar.setText(Integer.toString(habitanteBD.getIdVivienda()));
+                combo_rolActualizar.getSelectionModel().select(habitanteBD.getRol());
+                out_infoOperacion.setVisible(false);
+
+                btn_confirmacion.setText("Actualizar");
+                cambiarPane(pane_entrada, pane_actualizar);
                 break;
 
             case BORRAR:
@@ -130,13 +159,14 @@ public class HabitanteController {
         if (pane_actual == pane_inicio) btn_volver.setVisible(false);
     }
 
-    @FXML void confirmacionEjecutarOperacion(ActionEvent event) {
+    @FXML void ejecutarOperacionConfirmacion(ActionEvent event) {
         switch (opSeleccionada) {
             case CREAR:
                 operacionCrear();
                 break;
 
             case ACTUALIZAR:
+                operacionActualizar();
                 break;
 
             case BORRAR:
@@ -167,6 +197,13 @@ public class HabitanteController {
     @FXML private TableColumn<Map<String, Object>, Object> colIdCalle;
     @FXML private TableColumn<Map<String, Object>, Object> colNombreCalle;
 
+    //JavaFX - Actualizar habitante
+    @FXML private AnchorPane pane_actualizar;
+    @FXML private TextField field_idPersonaActualizar;
+    @FXML private TextField field_idViviendaActualizar;
+    @FXML private ComboBox<String> combo_rolActualizar;
+
+
     //Componentes generales
     private final Color colorAdvertencia = new Color(1.0f, 1.0f, 0.0f, 1.0f);
     private final Color colorExito = new Color(0.0f, 1.0f, 0.1529f, 1.0f);
@@ -193,7 +230,7 @@ public class HabitanteController {
         out_infoOperacion.setVisible(true);
     }
 
-    public boolean validarIdPersona() {
+    public boolean validarIdPersona(TextField in_idPersona) {
         out_infoOperacion.fillProperty().set(colorAdvertencia);
 
         if (in_idPersona.getText().isBlank()) {
@@ -211,7 +248,7 @@ public class HabitanteController {
         return true;
     }
 
-    public boolean validarIdVivienda() {
+    public boolean validarIdVivienda(TextField in_idVivienda) {
         out_infoOperacion.fillProperty().set(colorAdvertencia);
 
         if (in_idVivienda.getText().isBlank()) {
@@ -229,7 +266,7 @@ public class HabitanteController {
         return true;
     }
 
-    public boolean validarRol() {
+    public boolean validarRol(ComboBox<String> in_comboRol) {
         out_infoOperacion.fillProperty().set(colorAdvertencia);
 
         if (in_comboRol.getValue() == null) {
@@ -277,6 +314,7 @@ public class HabitanteController {
         padrePane.put(pane_entrada, pane_inicio);
 
         padrePane.put(pane_confirmacion, pane_entrada);
+        padrePane.put(pane_actualizar, pane_entrada);
 
         padrePane.put(pane_resultadoBusqueda, pane_entrada);
     }
@@ -288,11 +326,16 @@ public class HabitanteController {
     }
 
     public void operacionSeleccionada() {
-        btn_entrada.setText(opSeleccionada.getTexto());
+        btn_entrada.setText(opSeleccionada.getTextoBoton());
 
         in_idPersona.clear();
         in_idVivienda.clear();
         in_comboRol.getSelectionModel().clearSelection();
+
+        in_idVivienda.setVisible(opSeleccionada != operacion.ACTUALIZAR);
+        txt_viviendaEntrada.setVisible(opSeleccionada != operacion.ACTUALIZAR);
+        in_comboRol.setVisible(opSeleccionada != operacion.ACTUALIZAR);
+        txt_rolEntrada.setVisible(opSeleccionada != operacion.ACTUALIZAR);
 
         cambiarPane(pane_inicio, pane_entrada);
         btn_volver.setVisible(true);
@@ -302,17 +345,17 @@ public class HabitanteController {
     public boolean validarCamposCorrectos() {
         out_infoOperacion.fillProperty().set(colorAdvertencia);
 
-        if (!validarIdPersona()) {
+        if (!validarIdPersona(in_idPersona)) {
             in_idPersona.requestFocus();
             return false;
         }
 
-        if (!validarIdVivienda()) {
+        if (!validarIdVivienda(in_idVivienda)) {
             in_idVivienda.requestFocus();
             return false;
         }
 
-        if (!validarRol()) {
+        if (!validarRol(in_comboRol)) {
             in_comboRol.requestFocus();
             return false;
         }
@@ -361,11 +404,11 @@ public class HabitanteController {
         Integer idVivienda = null;
         String rol = in_comboRol.getValue();
 
-        if (validarIdPersona()) {
+        if (validarIdPersona(in_idPersona)) {
             idPersona = Integer.parseInt(in_idPersona.getText());
             if (!existePersona(idPersona)) return;
         }
-        if (validarIdVivienda()) {
+        if (validarIdVivienda(in_idVivienda)) {
             idVivienda = Integer.parseInt(in_idVivienda.getText());
             if (!existeVivienda(idVivienda)) return;
 
@@ -426,5 +469,33 @@ public class HabitanteController {
 
         colNombreCalle.setCellValueFactory(data ->
                 new SimpleObjectProperty<>(data.getValue().get("Calle")));
+    }
+
+    //Eventos - Actualizar habitante
+    public void operacionActualizar() {
+        int idPersona = Integer.parseInt(field_idPersonaActualizar.getText());
+
+        if(!validarIdVivienda(field_idViviendaActualizar)) return;
+        if(!validarRol(combo_rolActualizar)) return;
+
+        int nuevaVivienda = Integer.parseInt(field_idViviendaActualizar.getText());
+        String nuevoRol = combo_rolActualizar.getValue();
+
+        if(!validarIdVivienda(field_idViviendaActualizar) || !existeVivienda(nuevaVivienda)) return;
+        if(!validarRol(combo_rolActualizar)) return;
+
+        boolean exito = DBHabitante.actualizarHabitante(idPersona, nuevaVivienda, nuevoRol);
+        if(exito){
+            mensajeOperacion = "Habitante actualizado correctamente";
+            out_infoOperacion.fillProperty().set(colorExito);
+            mostrarInfoOperacion();
+        }
+        else{
+            mensajeOperacion = "Error al actualizar el habitante. Intente de nuevo";
+            out_infoOperacion.fillProperty().set(colorAdvertencia);
+            mostrarInfoOperacion();
+        }
+
+        cambiarPane(pane_actualizar, pane_entrada);
     }
 }

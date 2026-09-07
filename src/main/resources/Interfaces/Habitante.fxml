@@ -87,7 +87,7 @@
                   <Font name="CocogooseProTrial Light" size="19.0" />
                </font>
             </TextField>
-            <Text fill="#f9f0e0" layoutX="275.0" layoutY="114.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Id de la vivienda:">
+            <Text fx:id="txt_viviendaEntrada" fill="#f9f0e0" layoutX="275.0" layoutY="114.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Id de la vivienda:">
                <font>
                   <Font name="CocogooseProTrial Darkmode" size="20.0" />
                </font>
@@ -97,13 +97,48 @@
                   <Font name="CocogooseProTrial Light" size="19.0" />
                </font>
             </TextField>
-            <Text fill="#f9f0e0" layoutX="274.0" layoutY="197.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Rol:">
+            <Text fx:id="txt_rolEntrada" fill="#f9f0e0" layoutX="274.0" layoutY="197.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Rol:">
                <font>
                   <Font name="CocogooseProTrial Darkmode" size="20.0" />
                </font>
             </Text>
             <ComboBox fx:id="in_comboRol" layoutX="330.0" layoutY="177.0" prefHeight="26.0" prefWidth="226.0" />
-            <Button fx:id="btn_entrada" layoutX="303.0" layoutY="259.0" mnemonicParsing="false" onAction="#ejecutarOperacionEntrada" prefHeight="50.0" prefWidth="239.0" style="-fx-background-color: #FFF7EB;" text="Buscar" textFill="#540707">
+            <Button fx:id="btn_entrada" layoutX="289.0" layoutY="259.0" mnemonicParsing="false" onAction="#ejecutarOperacionEntrada" prefHeight="50.0" prefWidth="267.0" style="-fx-background-color: #FFF7EB;" text="Buscar" textFill="#540707">
+               <font>
+                  <Font name="CocogooseProTrial Darkmode" size="23.0" />
+               </font>
+            </Button>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="pane_actualizar" layoutX="45.0" layoutY="200.0" prefHeight="412.0" prefWidth="830.0" visible="false">
+         <children>
+            <Text fill="#f9f0e0" layoutX="273.0" layoutY="29.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Id de la persona:">
+               <font>
+                  <Font name="CocogooseProTrial Darkmode" size="20.0" />
+               </font>
+            </Text>
+            <TextField fx:id="field_idPersonaActualizar" disable="true" layoutX="450.0" prefHeight="40.0" prefWidth="106.0">
+               <font>
+                  <Font name="CocogooseProTrial Light" size="19.0" />
+               </font>
+            </TextField>
+            <Text fill="#f9f0e0" layoutX="275.0" layoutY="114.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Id de la vivienda:">
+               <font>
+                  <Font name="CocogooseProTrial Darkmode" size="20.0" />
+               </font>
+            </Text>
+            <TextField fx:id="field_idViviendaActualizar" layoutX="450.0" layoutY="87.0" prefHeight="40.0" prefWidth="106.0">
+               <font>
+                  <Font name="CocogooseProTrial Light" size="19.0" />
+               </font>
+            </TextField>
+            <Text fill="#f9f0e0" layoutX="274.0" layoutY="197.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Rol:">
+               <font>
+                  <Font name="CocogooseProTrial Darkmode" size="20.0" />
+               </font>
+            </Text>
+            <ComboBox fx:id="combo_rolActualizar" layoutX="330.0" layoutY="177.0" prefHeight="26.0" prefWidth="226.0" />
+            <Button fx:id="btn_confirmacion" layoutX="303.0" layoutY="259.0" mnemonicParsing="false" onAction="#ejecutarOperacionConfirmacion" prefHeight="50.0" prefWidth="239.0" style="-fx-background-color: #FFF7EB;" text="Actualizar" textFill="#540707">
                <font>
                   <Font name="CocogooseProTrial Darkmode" size="23.0" />
                </font>
@@ -215,7 +250,7 @@
                   <Font name="CocogooseProTrial Darkmode" size="20.0" />
                </font>
             </Text>
-            <Button fx:id="btn_confirmacion" layoutX="79.0" layoutY="424.0" mnemonicParsing="false" onAction="#confirmacionEjecutarOperacion" prefHeight="30.0" prefWidth="126.0" style="-fx-background-color: #FFF7EB;" text="Crear habitante" textFill="#540707">
+            <Button fx:id="btn_confirmacion" layoutX="79.0" layoutY="424.0" mnemonicParsing="false" onAction="#ejecutarOperacionConfirmacion" prefHeight="30.0" prefWidth="126.0" style="-fx-background-color: #FFF7EB;" text="Crear habitante" textFill="#540707">
                <font>
                   <Font size="14.0" />
                </font>
