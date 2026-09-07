@@ -13,7 +13,7 @@ import java.util.Map;
 public class JDHabitante {
     private Conexion conexion = new Conexion();
 
-    public void insertarHabitante(int idPersona, int idVivienda, String rol){
+    public boolean insertarHabitante(int idPersona, int idVivienda, String rol){
         String sentencia = "INSERT INTO habitantes (id_persona, id_vivienda, hab_rol) VALUES (?, ?, ?)";
 
         try(PreparedStatement ps = conexion.getConexion().prepareStatement(sentencia)){
@@ -23,52 +23,76 @@ public class JDHabitante {
             int filas = ps.executeUpdate();
 
             if(filas > 0){
-                System.out.println("Habitante registrado correctamente");
+                return true;
             }
         }
         catch(SQLException e){
             System.out.println("Error al insertar habitante: " + e.getMessage());
         }
+
+        return false;
+    }
+
+    public HabitanteBD buscarHabitante(int idPersona){
+        HabitanteBD habitante = null;
+
+        String sentencia = " SELECT * FROM habitantes WHERE id_persona = ?";
+//        System.out.println(sentencia.toString());
+
+        try(PreparedStatement ps = conexion.getConexion().prepareStatement(sentencia.toString())){
+            ps.setInt(1, idPersona);
+
+            ResultSet rs = ps.executeQuery();
+
+            while(rs.next()){
+                habitante = new HabitanteBD(rs.getInt("id_persona"), rs.getInt("id_vivienda"), rs.getString("hab_rol"));
+            }
+        }
+        catch(SQLException e){
+            System.out.println("Error al consultar habitante: " + e.getMessage());
+        }
+
+        return habitante;
+    }
+
+    public boolean actualizarHabitante(int idPersona, int nuevoIdVivienda, String nuevoRol){
+        String sentencia = " UPDATE habitantes SET id_vivienda = ?, hab_rol = ? WHERE id_persona = ?";
+
+        try(PreparedStatement ps = conexion.getConexion().prepareStatement(sentencia.toString())){
+            ps.setInt(1, nuevoIdVivienda);
+            ps.setString(2, nuevoRol);
+            ps.setInt(3, idPersona);
+
+            ps.executeUpdate();
+        }
+        catch(SQLException e){
+            System.out.println("Error al actualizar habitante: " + e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean borrarHabitante(int idPersona){
+        String sentencia = " DELETE FROM habitantes WHERE id_persona = ?";
+
+        try(PreparedStatement ps = conexion.getConexion().prepareStatement(sentencia.toString())){
+            ps.setInt(1, idPersona);
+
+            ps.executeUpdate();
+        }
+        catch(SQLException e){
+            System.out.println("Error al actualizar habitante: " + e.getMessage());
+            return false;
+        }
+
+        return true;
     }
 
     public ObservableList<Map<String, Object>> buscarHabitantes(Integer idPersona, Integer idVivienda, String rol){
         ObservableList<Map<String, Object>> datosEncontrados = FXCollections.observableArrayList();
-        StringBuilder sentencia = new StringBuilder(
-                """
-                        SELECT
-                             persona.id_persona,
-                             persona.per_nombre,
-                             habitantes.hab_rol,
-                             vivienda.id_vivienda,
-                             vivienda.viv_tipo,
-                             vivienda.viv_numExt,
-                             vivienda.viv_numInt,
-                             vivienda.viv_mtscuadrados,
-                             calle.id_calle,
-                             calle.cal_nombre
-                        FROM persona
-                             JOIN habitantes ON persona.id_persona = habitantes.id_persona
-                             JOIN vivienda ON habitantes.id_vivienda = vivienda.id_vivienda
-                             JOIN calle ON vivienda.id_calle = calle.id_calle""");
 
-        if(idPersona != null || idVivienda != null || rol != null) sentencia.append("\nWHERE ");
-
-        StringBuilder personaString = new StringBuilder(), viviendaString = new StringBuilder(), rolString = new StringBuilder();
-        if(idPersona != null){
-            personaString.append("persona.id_persona = ? ");
-        }
-        if(idVivienda != null){
-            viviendaString.append("vivienda.id_vivienda = ? ");
-        }
-        if(rol != null){
-            rolString.append("habitantes.hab_rol = ?");
-        }
-
-        sentencia.append(personaString + (!personaString.isEmpty() && (!viviendaString.isEmpty() || !rolString.isEmpty()) ? "AND " : ""));
-        sentencia.append(viviendaString + (!viviendaString.isEmpty() && !rolString.isEmpty() ? "AND " : ""));
-        sentencia.append(rolString);
-
-        sentencia.append("\nGROUP BY persona.id_persona");
+        String sentencia = construirSentenciaBuscarHabitantes(idPersona, idVivienda, rol);
 //        System.out.println(sentencia.toString());
 
         try(PreparedStatement ps = conexion.getConexion().prepareStatement(sentencia.toString())){
@@ -108,5 +132,46 @@ public class JDHabitante {
             System.out.println("Error al consultar habitante: " + e.getMessage());
         }
         return null;
+    }
+
+    public String construirSentenciaBuscarHabitantes(Integer idPersona, Integer idVivienda, String rol){
+        StringBuilder sentencia = new StringBuilder(
+                """
+                        SELECT
+                             persona.id_persona,
+                             persona.per_nombre,
+                             habitantes.hab_rol,
+                             vivienda.id_vivienda,
+                             vivienda.viv_tipo,
+                             vivienda.viv_numExt,
+                             vivienda.viv_numInt,
+                             vivienda.viv_mtscuadrados,
+                             calle.id_calle,
+                             calle.cal_nombre
+                        FROM persona
+                             JOIN habitantes ON persona.id_persona = habitantes.id_persona
+                             JOIN vivienda ON habitantes.id_vivienda = vivienda.id_vivienda
+                             JOIN calle ON vivienda.id_calle = calle.id_calle""");
+
+        if(idPersona != null || idVivienda != null || rol != null) sentencia.append("\nWHERE ");
+
+        StringBuilder personaString = new StringBuilder(), viviendaString = new StringBuilder(), rolString = new StringBuilder();
+        if(idPersona != null){
+            personaString.append("persona.id_persona = ? ");
+        }
+        if(idVivienda != null){
+            viviendaString.append("vivienda.id_vivienda = ? ");
+        }
+        if(rol != null){
+            rolString.append("habitantes.hab_rol = ?");
+        }
+
+        sentencia.append(personaString + (!personaString.isEmpty() && (!viviendaString.isEmpty() || !rolString.isEmpty()) ? "AND " : ""));
+        sentencia.append(viviendaString + (!viviendaString.isEmpty() && !rolString.isEmpty() ? "AND " : ""));
+        sentencia.append(rolString);
+
+        sentencia.append("\nGROUP BY persona.id_persona");
+
+        return sentencia.toString();
     }
 }
