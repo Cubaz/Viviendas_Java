@@ -3,12 +3,14 @@ package Controllers;
 import ObjetosBD.Calle.CalleBD;
 import ObjetosBD.Calle.JDCalle;
 
+import ObjetosBD.Departamento.DepartamentoBD;
 import ObjetosBD.Departamento.JDDepartamento;
 import ObjetosBD.Edificio.EdificioBD;
 import ObjetosBD.Edificio.JDEdificio;
 import ObjetosBD.Persona.JDPersona;
 import ObjetosBD.Persona.PersonaBD;
 import ObjetosBD.Propietario.JDPropietario;
+import ObjetosBD.Propietario.PropietarioBD;
 import ObjetosBD.Vivienda.JDVivienda;
 import ObjetosBD.Vivienda.ViviendaBD;
 import javafx.animation.FadeTransition;
@@ -223,6 +225,8 @@ public class ViviendaController {
             return;
         }
 
+
+
         if (habitantes.getText().isBlank() || num_ext.getText().isBlank() || num_int.getText().isBlank() || mts_cuadrados.getText().isBlank()) {
             mensajeOperacion = "Debe llenar todos los campos";
             out_infoOperacion.setFill(colorAdvertencia);
@@ -316,6 +320,7 @@ public class ViviendaController {
         tabla_vivienda.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 ViviendaBD seleccionada = tabla_vivienda.getSelectionModel().getSelectedItem();
+
                 if (seleccionada != null) {
                     vivienda.setValue(seleccionada.getTipo());
                     habitantes.setText(String.valueOf(seleccionada.getNum_habitantes()));
@@ -329,8 +334,11 @@ public class ViviendaController {
                             break;
                         }
                     }
+                    llenarCamposRelacionados(seleccionada.getId_vivienda());
+
                 }
             }
+
         });
     }
 
@@ -373,4 +381,29 @@ public class ViviendaController {
 
         fadeOut.play();
     }
+
+    private void llenarCamposRelacionados(int idVivienda) {
+
+        PropietarioBD duenio = PRDB.buscarPropietarioID(idVivienda);
+        if (duenio != null) {
+
+            PersonaBD persona = PDB.buscarPersonaID(duenio.getId_persona());
+            if (persona != null) {
+                propietario.setValue(persona);
+            }
+        }
+
+
+        if ("Departamento".equals(vivienda.getValue())) {
+            DepartamentoBD departamento = DDB.buscarDepartamento(idVivienda);
+            if (departamento != null) {
+                EdificioBD edificioBD = EDB.buscarEdificioID(departamento.getId_edificio());
+                edificio.setValue(edificioBD);
+                piso.setText(String.valueOf(departamento.getPiso()));
+            }
+        }
+    }
+
+
+
 }

@@ -31,12 +31,15 @@ public class JDPropietario {
         String SQL = "SELECT * FROM propietario WHERE id_vivienda = ?";
         try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
             PS.setInt(1, id);
+            System.out.println("Ejecutando consulta propietario con id_vivienda = " + id);
             try(ResultSet RS = PS.executeQuery()){
                 if(RS.next()){
                     int idVivienda = RS.getInt("id_vivienda");
                     int idPersona = RS.getInt("id_persona");
-
+                    System.out.println("Propietario encontrado: idVivienda=" + idVivienda + ", idPersona=" + idPersona);
                     return new PropietarioBD(idVivienda, idPersona);
+                } else {
+                    System.out.println("No se encontró propietario para vivienda " + id);
                 }
             }
         }catch (SQLException e){
@@ -44,6 +47,7 @@ public class JDPropietario {
         }
         return null;
     }
+
 
     public PersonaBD buscarPropietarioNombre(String nombre){
         String SQL = "SELECT p.* FROM persona p JOIN propietario pr ON p.id_persona = pr.id_persona WHERE p.per_nombre LIKE ?";
