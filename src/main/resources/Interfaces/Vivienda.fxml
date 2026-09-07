@@ -12,9 +12,9 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="900.0" prefWidth="1550.0" style="-fx-background-color: #cc3a63;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.ViviendaController">
+<AnchorPane prefHeight="704.0" prefWidth="1608.0" style="-fx-background-color: #cc3a63;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.ViviendaController">
    <children>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ab8174" height="766.0" layoutX="38.0" layoutY="138.0" stroke="TRANSPARENT" strokeType="INSIDE" style="-fx-arc-width: 30; -fx-arc-height: 30; -fx-opacity: 0.50;" width="777.0">
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ab8174" height="603.0" layoutX="39.0" layoutY="68.0" stroke="TRANSPARENT" strokeType="INSIDE" style="-fx-arc-width: 30; -fx-arc-height: 30; -fx-opacity: 0.50;" width="777.0">
          <effect>
             <DropShadow>
                <color>
@@ -23,71 +23,71 @@
             </DropShadow>
          </effect>
       </Rectangle>
-      <Text fill="#f9f0e0" layoutX="629.0" layoutY="86.0" strokeType="OUTSIDE" strokeWidth="0.0" text="VIVIENDA">
+      <Text fill="#f9f0e0" layoutX="629.0" layoutY="56.0" strokeType="OUTSIDE" strokeWidth="0.0" text="VIVIENDA">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="58.0" />
          </font>
       </Text>
-      <Text fill="#f9f0e0" layoutX="98.0" layoutY="198.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Tipo de Vivienda:">
+      <Text fill="#f9f0e0" layoutX="101.0" layoutY="122.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Tipo de Vivienda:">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="20.0" />
          </font>
       </Text>
-      <Text fill="#f9f0e0" layoutX="98.0" layoutY="268.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Calle:">
+      <Text fill="#f9f0e0" layoutX="99.0" layoutY="172.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Calle:">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="20.0" />
          </font>
       </Text>
-      <Text fill="#f9f0e0" layoutX="98.0" layoutY="341.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Número de Habitantes:">
+      <Text fill="#f9f0e0" layoutX="99.0" layoutY="224.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Número de Habitantes:">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="20.0" />
          </font>
       </Text>
-      <TextField fx:id="habitantes" layoutX="432.0" layoutY="313.0" prefHeight="40.0" prefWidth="324.0" />
-      <Text fill="#f9f0e0" layoutX="98.0" layoutY="417.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Número Exterior:">
+      <TextField fx:id="habitantes" layoutX="433.0" layoutY="196.0" prefHeight="40.0" prefWidth="324.0" />
+      <Text fill="#f9f0e0" layoutX="99.0" layoutY="270.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Número Exterior:">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="20.0" />
          </font>
       </Text>
-      <Text fill="#f9f0e0" layoutX="100.0" layoutY="494.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Número Interior:">
+      <Text fill="#f9f0e0" layoutX="100.0" layoutY="317.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Número Interior:">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="20.0" />
          </font>
       </Text>
-      <TextField fx:id="num_ext" layoutX="432.0" layoutY="390.0" prefHeight="40.0" prefWidth="324.0" />
-      <TextField fx:id="num_int" layoutX="432.0" layoutY="466.0" prefHeight="40.0" prefWidth="324.0" />
-      <Text fill="#f9f0e0" layoutX="100.0" layoutY="569.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Metros Cuadrados:">
+      <TextField fx:id="num_ext" layoutX="433.0" layoutY="243.0" prefHeight="40.0" prefWidth="324.0" />
+      <TextField fx:id="num_int" layoutX="432.0" layoutY="289.0" prefHeight="40.0" prefWidth="324.0" />
+      <Text fill="#f9f0e0" layoutX="101.0" layoutY="364.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Metros Cuadrados:">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="20.0" />
          </font>
       </Text>
-      <TextField fx:id="mts_cuadrados" layoutX="432.0" layoutY="541.0" prefHeight="40.0" prefWidth="324.0" />
-      <Button layoutX="282.0" layoutY="805.0" mnemonicParsing="false" onAction="#registrar_vivienda" prefHeight="76.0" prefWidth="300.0" style="-fx-background-color: #FFF7EB;" text="CONFIRMAR" textFill="#540707">
+      <TextField fx:id="mts_cuadrados" layoutX="433.0" layoutY="336.0" prefHeight="40.0" prefWidth="324.0" />
+      <Button layoutX="283.0" layoutY="570.0" mnemonicParsing="false" onAction="#registrar_vivienda" prefHeight="76.0" prefWidth="300.0" style="-fx-background-color: #FFF7EB;" text="CONFIRMAR" textFill="#540707">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="23.0" />
          </font>
       </Button>
-      <Text disable="true" fill="#f9f0e0" layoutX="98.0" layoutY="701.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Edificio:">
+      <Text disable="true" fill="#f9f0e0" layoutX="99.0" layoutY="460.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Edificio:">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="20.0" />
          </font>
       </Text>
-      <ComboBox fx:id="vivienda" layoutX="432.0" layoutY="170.0" prefHeight="40.0" prefWidth="324.0" />
-      <ComboBox fx:id="calle" layoutX="432.0" layoutY="240.0" prefHeight="40.0" prefWidth="324.0" />
-      <ComboBox fx:id="edificio" disable="true" layoutX="432.0" layoutY="673.0" prefHeight="40.0" prefWidth="324.0" />
-      <Text disable="true" fill="#f9f0e0" layoutX="98.0" layoutY="760.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Piso:">
+      <ComboBox fx:id="vivienda" layoutX="432.0" layoutY="94.0" prefHeight="40.0" prefWidth="324.0" />
+      <ComboBox fx:id="calle" layoutX="433.0" layoutY="144.0" prefHeight="40.0" prefWidth="324.0" />
+      <ComboBox fx:id="edificio" disable="true" layoutX="433.0" layoutY="432.0" prefHeight="40.0" prefWidth="324.0" />
+      <Text disable="true" fill="#f9f0e0" layoutX="99.0" layoutY="508.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Piso:">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="20.0" />
          </font>
       </Text>
-      <TextField fx:id="piso" disable="true" layoutX="432.0" layoutY="732.0" prefHeight="40.0" prefWidth="324.0" />
-      <ComboBox fx:id="propietario" layoutX="432.0" layoutY="608.0" prefHeight="40.0" prefWidth="324.0" />
-      <Text disable="true" fill="#f9f0e0" layoutX="98.0" layoutY="635.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Propietario:">
+      <TextField fx:id="piso" disable="true" layoutX="433.0" layoutY="480.0" prefHeight="40.0" prefWidth="324.0" />
+      <ComboBox fx:id="propietario" layoutX="433.0" layoutY="384.0" prefHeight="40.0" prefWidth="324.0" />
+      <Text disable="true" fill="#f9f0e0" layoutX="99.0" layoutY="411.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Propietario:">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="20.0" />
          </font>
       </Text>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ab8174" height="766.0" layoutX="843.0" layoutY="138.0" stroke="TRANSPARENT" strokeType="INSIDE" style="-fx-arc-width: 30; -fx-arc-height: 30; -fx-opacity: 0.50;" width="731.0">
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ab8174" height="603.0" layoutX="844.0" layoutY="68.0" stroke="TRANSPARENT" strokeType="INSIDE" style="-fx-arc-width: 30; -fx-arc-height: 30; -fx-opacity: 0.50;" width="731.0">
          <effect>
             <DropShadow>
                <color>
@@ -96,7 +96,7 @@
             </DropShadow>
          </effect>
       </Rectangle>
-      <TableView fx:id="tabla_vivienda" layoutX="862.0" layoutY="339.0" prefHeight="433.0" prefWidth="696.0">
+      <TableView fx:id="tabla_vivienda" layoutX="865.0" layoutY="248.0" prefHeight="275.0" prefWidth="696.0">
         <columns>
           <TableColumn fx:id="colIdVivienda" prefWidth="81.0" text="Id Vivienda" />
           <TableColumn fx:id="colTipoVivienda" prefWidth="103.0" text="Tipo Vivienda" />
@@ -107,34 +107,34 @@
             <TableColumn fx:id="colMtsCuadrados" prefWidth="113.0" text="Mts Cuadrados" />
         </columns>
       </TableView>
-      <TextField fx:id="parametro" layoutX="940.0" layoutY="250.0" prefHeight="56.0" prefWidth="316.0" />
-      <ComboBox fx:id="criterio" layoutX="940.0" layoutY="200.0" prefHeight="40.0" prefWidth="540.0" />
-      <Text fill="#f9f0e0" layoutX="1093.0" layoutY="187.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Buscar por:">
+      <TextField fx:id="parametro" layoutX="943.0" layoutY="159.0" prefHeight="56.0" prefWidth="316.0" />
+      <ComboBox fx:id="criterio" layoutX="943.0" layoutY="109.0" prefHeight="40.0" prefWidth="540.0" />
+      <Text fill="#f9f0e0" layoutX="1096.0" layoutY="96.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Buscar por:">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="31.0" />
          </font>
       </Text>
-      <Button layoutX="952.0" layoutY="797.0" mnemonicParsing="false" onAction="#actualizar_vivienda" prefHeight="76.0" prefWidth="244.0" style="-fx-background-color: #FFF7EB;" text="ACTUALIZAR" textFill="#540707">
+      <Button layoutX="955.0" layoutY="570.0" mnemonicParsing="false" onAction="#actualizar_vivienda" prefHeight="76.0" prefWidth="244.0" style="-fx-background-color: #FFF7EB;" text="ACTUALIZAR" textFill="#540707">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="23.0" />
          </font>
       </Button>
-      <Button layoutX="1224.0" layoutY="797.0" mnemonicParsing="false" onAction="#eliminar_vivienda" prefHeight="76.0" prefWidth="244.0" style="-fx-background-color: #FFF7EB;" text="ELIMINAR" textFill="#540707">
+      <Button layoutX="1227.0" layoutY="570.0" mnemonicParsing="false" onAction="#eliminar_vivienda" prefHeight="76.0" prefWidth="244.0" style="-fx-background-color: #FFF7EB;" text="ELIMINAR" textFill="#540707">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="23.0" />
          </font>
       </Button>
-      <Button layoutX="1299.0" layoutY="250.0" mnemonicParsing="false" onAction="#buscar_vivienda" prefHeight="56.0" prefWidth="181.0" style="-fx-background-color: #FFF7EB;" text="BUSCAR" textFill="#540707">
+      <Button layoutX="1302.0" layoutY="159.0" mnemonicParsing="false" onAction="#buscar_vivienda" prefHeight="56.0" prefWidth="181.0" style="-fx-background-color: #FFF7EB;" text="BUSCAR" textFill="#540707">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="23.0" />
          </font>
       </Button>
-      <Text fx:id="out_infoOperacion" layoutX="976.0" layoutY="117.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="513.0">
+      <Text fx:id="out_infoOperacion" layoutX="971.0" layoutY="47.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="513.0">
          <font>
             <Font size="37.0" />
          </font>
       </Text>
-      <Button layoutX="37.0" layoutY="39.0" mnemonicParsing="false" onAction="#regresar" prefHeight="49.0" prefWidth="199.0" style="-fx-background-color: #FFF7EB;" text="REGRESAR" textFill="#540707">
+      <Button layoutX="39.0" layoutY="7.0" mnemonicParsing="false" onAction="#regresar" prefHeight="27.0" prefWidth="199.0" style="-fx-background-color: #FFF7EB;" text="REGRESAR" textFill="#540707">
          <font>
             <Font name="CocogooseProTrial Darkmode" size="23.0" />
          </font>
