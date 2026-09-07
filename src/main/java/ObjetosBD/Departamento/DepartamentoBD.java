@@ -13,6 +13,14 @@ public class DepartamentoBD {
         this.piso = num_piso;
     }
 
+    public int getId_departamento() {
+        return id_departamento;
+    }
+
+    public void setId_departamento(int id_departamento) {
+        this.id_departamento = id_departamento;
+    }
+
     public int getId_vivienda(){return id_vivienda;}
 
     public void setId_vivienda(int id_vivienda) {
@@ -33,5 +41,10 @@ public class DepartamentoBD {
 
     public void setPiso(int piso) {
         this.piso = piso;
+    }
+
+    @Override
+    public String toString() {
+        return "Departamento " + id_departamento + " (Piso " + piso + ")";
     }
 }

@@ -5,8 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import javafx.scene.control.TextField;
-
 
 
 public class Inicio extends Application {
@@ -14,7 +12,7 @@ public class Inicio extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/Habitante/BuscarHab.fxml")); ///ABRE LA VISTA DE LA PORTADA DEL PROYECTO
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/Edificio.fxml")); ///ABRE LA VISTA DE LA PORTADA DEL PROYECTO
 
         ///  LAS SIGUIENTES FUNCIONES SON LAS QUE INICIALIZAN LA VISTA DE LA PORTADA Y LA MUESTRAN EN LA PANTALLA
         AnchorPane pane = loader.load();
