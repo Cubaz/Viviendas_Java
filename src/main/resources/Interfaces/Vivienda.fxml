@@ -12,7 +12,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="704.0" prefWidth="1608.0" style="-fx-background-color: #cc3a63;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.ViviendaController">
+<AnchorPane prefHeight="704.0" prefWidth="1608.0" style="-fx-background-color: #cc3a63;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.ViviendaController">
    <children>
       <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ab8174" height="603.0" layoutX="39.0" layoutY="68.0" stroke="TRANSPARENT" strokeType="INSIDE" style="-fx-arc-width: 30; -fx-arc-height: 30; -fx-opacity: 0.50;" width="777.0">
          <effect>

@@ -1,6 +1,9 @@
 package ObjetosBD.Persona;
 
 import ObjetosBD.Conexion;
+import ObjetosBD.DataAccessException;
+import Validation.Validaciones;
+import java.sql.Connection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -12,12 +15,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JDPersona {
-    private Conexion CN = new Conexion();
+    private final Conexion CN = new Conexion();
 
     public int insertarPersona(String nombrePersona, int IdFamilia, int edad){
+        nombrePersona = Validaciones.texto(nombrePersona, "nombrePersona", 100);
+        Validaciones.id(IdFamilia, "IdFamilia");
+        Validaciones.rango(edad, "Edad", 0, 150);
         String sql = "INSERT INTO persona(per_nombre, id_familia, per_edad) VALUES (?, ?, ?)";
 
-        try (PreparedStatement ps = CN.getConexion().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
+        try(Connection c = CN.getConexion(); PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             ps.setString(1, nombrePersona);
             ps.setInt(2, IdFamilia);
             ps.setInt(3, edad);
@@ -25,16 +31,12 @@ public class JDPersona {
             int filas = ps.executeUpdate();
 
             if(filas > 0){
-                var rs = ps.getGeneratedKeys();
-                if(rs.next()){
-                    int idGenerado = rs.getInt(1);
-                    System.out.println("REGISTRO DE PERSONA EXITOSO");
-                    System.out.println("SU ID DE PERSONA ES: " + idGenerado);
-                    return idGenerado;
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) return rs.getInt(1);
                 }
             }
-        }catch (SQLException e){
-            System.out.println("Error al insertar persona: " + e.getMessage());
+        }catch (SQLException e) {
+            throw new DataAccessException("Error al insertar persona", e);
         }
         return -1;
     }
@@ -43,7 +45,7 @@ public class JDPersona {
         ObservableList<PersonaBD> lista = FXCollections.observableArrayList();
         String sql = "SELECT * FROM persona";
 
-        try (PreparedStatement ps = CN.getConexion().prepareStatement(sql);
+        try(Connection c = CN.getConexion(); PreparedStatement ps = c.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
@@ -55,14 +57,15 @@ public class JDPersona {
                 lista.add(new PersonaBD(id, nombre, familia, edad));
             }
         } catch (SQLException e) {
-            System.out.println("Error al obtener persona: " + e.getMessage());
+            throw new DataAccessException("Error al obtener persona", e);
         }
         return lista;
     }
 
     public PersonaBD buscarPersonaID(int idPersona){
+        Validaciones.id(idPersona, "idPersona");
         String SQL = "SELECT * FROM persona WHERE id_persona = ?";
-        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+        try(Connection c = CN.getConexion(); PreparedStatement PS = c.prepareStatement(SQL)){
             PS.setInt(1, idPersona);
             try(ResultSet RS = PS.executeQuery()){
                 if(RS.next()){
@@ -73,15 +76,16 @@ public class JDPersona {
                     return new PersonaBD(idPersona, nombre, familia, edad);
                 }
             }
-        }catch (SQLException e){
-            System.out.println("ERROR AL BUSCAR POR ID: " + e.getMessage());
+        }catch (SQLException e) {
+            throw new DataAccessException("ERROR AL BUSCAR POR ID", e);
         }
         return null;
     }
 
     public PersonaBD buscarPersonaNombre(String nombrePersona){
+        nombrePersona = Validaciones.texto(nombrePersona, "nombrePersona", 100);
         String SQL = "SELECT * FROM persona WHERE per_nombre LIKE ?";
-        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+        try(Connection c = CN.getConexion(); PreparedStatement PS = c.prepareStatement(SQL)){
             PS.setString(1, "%" + nombrePersona + "%");
             try(ResultSet RS = PS.executeQuery()){
                 if(RS.next()){
@@ -93,44 +97,51 @@ public class JDPersona {
                     return new PersonaBD(id, nombre, familia, edad);
                 }
             }
-        }catch (SQLException e){
-            System.out.println("ERROR AL BUSCAR POR NOMBRE: " + e.getMessage());
+        }catch (SQLException e) {
+            throw new DataAccessException("ERROR AL BUSCAR POR NOMBRE", e);
         }
         return null;
     }
 
     public boolean actualizarPersona(int idPersona, String nombrePersona, int idFamilia, int edad){
+        Validaciones.id(idPersona, "idPersona");
+        nombrePersona = Validaciones.texto(nombrePersona, "nombrePersona", 100);
+        Validaciones.id(idFamilia, "idFamilia");
+        Validaciones.rango(edad, "Edad", 0, 150);
         String SQL = "UPDATE persona SET per_nombre = ?, id_familia = ?, per_edad = ? WHERE id_persona = ?";
-        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+        try(Connection c = CN.getConexion(); PreparedStatement PS = c.prepareStatement(SQL)){
             PS.setString(1, nombrePersona);
             PS.setInt(2, idFamilia);
             PS.setInt(3, edad);
             PS.setInt(4, idPersona);
 
             return PS.executeUpdate() > 0;
-        }catch (SQLException e){
-            System.out.println("ERROR AL ACTUALIZAR PERSONA: " + e.getMessage());
-            return false;
+        }catch (SQLException e) {
+            throw new DataAccessException("ERROR AL ACTUALIZAR PERSONA", e);
         }
     }
 
     public boolean eliminarPersona(int idPersona){
+        Validaciones.id(idPersona, "idPersona");
         String SQL = "DELETE FROM persona WHERE id_persona = ?";
-        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+        try(Connection c = CN.getConexion(); PreparedStatement PS = c.prepareStatement(SQL)){
             PS.setInt(1, idPersona);
             return PS.executeUpdate() > 0;
-        }catch (SQLException e){
-            System.out.println("ERROR AL ELIMINAR PERSONA: " + e.getMessage());
-            return false;
+        }catch (SQLException e) {
+            throw new DataAccessException("ERROR AL ELIMINAR PERSONA", e);
         }
     }
 
     public ObservableList<Map<String, Object>> buscarPersonas(Integer idPersona, String nombre, Integer idFamilia, Integer edad){
+        if (idPersona != null) Validaciones.id(idPersona, "idPersona");
+        if (nombre != null && !nombre.isEmpty()) nombre = Validaciones.texto(nombre, "nombre", 100);
+        if (idFamilia != null) Validaciones.id(idFamilia, "idFamilia");
+        if (edad != null) Validaciones.rango(edad, "Edad", 0, 150);
         ObservableList<Map<String, Object>> datosEncontrados = FXCollections.observableArrayList();
 
         String sentencia = construirSentenciaBuscarPersonas(idPersona, nombre, idFamilia, edad);
 
-        try(PreparedStatement ps = CN.getConexion().prepareStatement(sentencia)){
+        try(Connection c = CN.getConexion(); PreparedStatement ps = c.prepareStatement(sentencia)){
             int index =  1;
             if(idPersona != null){
                 ps.setInt(index++, idPersona);
@@ -145,27 +156,32 @@ public class JDPersona {
                 ps.setInt(index++, edad);
             }
 
-            ResultSet rs = ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
 
-            while(rs.next()){
-                Map<String, Object> fila = new HashMap<>();
-                fila.put("IdPersona", rs.getInt("id_persona"));
-                fila.put("Nombre", rs.getString("per_nombre"));
-                fila.put("Edad", rs.getInt("per_edad"));
-                fila.put("IdFamilia", rs.getInt("id_familia"));
-                fila.put("ApellidosFamilia", rs.getString("fam_apellidos"));
-                datosEncontrados.add(fila);
+                while(rs.next()){
+                    Map<String, Object> fila = new HashMap<>();
+                    fila.put("IdPersona", rs.getInt("id_persona"));
+                    fila.put("Nombre", rs.getString("per_nombre"));
+                    fila.put("Edad", rs.getInt("per_edad"));
+                    fila.put("IdFamilia", rs.getInt("id_familia"));
+                    fila.put("ApellidosFamilia", rs.getString("fam_apellidos"));
+                    datosEncontrados.add(fila);
+                }
+
             }
 
-            if(!datosEncontrados.isEmpty()) return datosEncontrados;
         }
-        catch(SQLException e){
-            System.out.println("Error al consultar persona: " + e.getMessage());
+        catch (SQLException e) {
+            throw new DataAccessException("Error al consultar persona", e);
         }
-        return null;
+        return datosEncontrados;
     }
 
     public String construirSentenciaBuscarPersonas(Integer idPersona, String nombre, Integer idFamilia, Integer edad){
+        if (idPersona != null) Validaciones.id(idPersona, "idPersona");
+        if (nombre != null && !nombre.isEmpty()) nombre = Validaciones.texto(nombre, "nombre", 100);
+        if (idFamilia != null) Validaciones.id(idFamilia, "idFamilia");
+        if (edad != null) Validaciones.rango(edad, "Edad", 0, 150);
         StringBuilder sentencia = new StringBuilder(
                 """
                         SELECT
@@ -200,8 +216,6 @@ public class JDPersona {
             }
             sentencia.append(cond);
         }
-
-        sentencia.append("\nGROUP BY persona.id_persona");
 
         return sentencia.toString();
     }

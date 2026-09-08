@@ -1,5 +1,7 @@
 package Controllers;
 
+import Validation.Validaciones;
+
 import ObjetosBD.Calle.CalleBD;
 import ObjetosBD.Calle.JDCalle;
 import ObjetosBD.Colonia.ColoniaBD;
@@ -60,16 +62,19 @@ public class CalleController {
         boolean eliminado = FDC.eliminarCalle(seleccionada.getId_calle());
 
         if (eliminado) {
-            mensajeOperacion = "Colonia eliminada correctamente";
+            mensajeOperacion = "Calle eliminada correctamente";
             out_infoOperacion.fillProperty().set(colorExito);
 
 
+            String mensajeExito = mensajeOperacion;
             buscar_calle(null);
+            mensajeOperacion = mensajeExito;
+            out_infoOperacion.setFill(colorExito);
 
 
             nom_calle.clear();
         } else {
-            mensajeOperacion = "No se pudo eliminar la colonia";
+            mensajeOperacion = "No se pudo eliminar la calle";
             out_infoOperacion.fillProperty().set(colorAdvertencia);
         }
 
@@ -113,13 +118,11 @@ public class CalleController {
     }
 
     private void validar(){
-        if(nom_calle.getText().isBlank()){
-            System.out.println("El nombre de la calle es necesario");
-            nom_calle.requestFocus();
-            return;
-        }
+        nom_calle.setText(Validaciones.texto(nom_calle.getText(), "Nombre de calle", 120));
         if(combo_colonia.getValue() == null){
-            System.out.println("El numero de colonia es necesario");
+            mensajeOperacion = "Debe seleccionar una colonia";
+            out_infoOperacion.setFill(colorAdvertencia);
+            mostrarInfoOperacion();
             combo_colonia.requestFocus();
             return;
         }
@@ -130,12 +133,15 @@ public class CalleController {
         int IdColonia = coloniaSeleccionada.getId_colonia();
 
         int id= FDC.insertarCalle(nombreCalle, IdColonia);
-        if(id != -1){
-            System.out.println("Registro exitoso \\nID de asignado:" + id);
-
-        }else{
-            System.out.println("Error en el registro de CALLE");
+        if(id > 0){
+            mensajeOperacion = "Calle registrada. ID: " + id;
+            out_infoOperacion.setFill(colorExito);
+            nom_calle.clear();
+        } else {
+            mensajeOperacion = "Error en el registro de calle";
+            out_infoOperacion.setFill(colorAdvertencia);
         }
+        mostrarInfoOperacion();
     }
 
     @FXML
@@ -149,12 +155,7 @@ public class CalleController {
             return;
         }
 
-        if (colNombreCalle.getText().isBlank()) {
-            mensajeOperacion = "El nombre no puede estar vacío";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
-            return;
-        }
+        nom_calle.setText(Validaciones.texto(nom_calle.getText(), "Nombre de calle", 120));
 
         // 🔹 Obtener colonia seleccionada en el ComboBox
         ColoniaBD coloniaSeleccionada = (ColoniaBD) combo_colonia.getValue();
@@ -175,7 +176,10 @@ public class CalleController {
             out_infoOperacion.fillProperty().set(colorExito);
 
             // Refrescar tabla
+            String mensajeExito = mensajeOperacion;
             buscar_calle(null);
+            mensajeOperacion = mensajeExito;
+            out_infoOperacion.setFill(colorExito);
         } else {
             mensajeOperacion = "No se pudo actualizar la calle";
             out_infoOperacion.fillProperty().set(colorAdvertencia);
@@ -206,7 +210,7 @@ public class CalleController {
         ObservableList<CalleBD> resultadoBusqueda = FXCollections.observableArrayList();
 
         if(criterio.getValue().equals("ID")){
-            int busqueda = Integer.parseInt(parametro.getText());
+            int busqueda = Validaciones.entero(parametro.getText(), "ID", 1, Integer.MAX_VALUE);
             resultadoBusqueda = FDC.buscarCalleIDTABLA(busqueda);
             if(resultadoBusqueda.isEmpty()){
                 mensajeOperacion = "No se encontraron resultados";
@@ -217,7 +221,7 @@ public class CalleController {
                 tabla_calle.setItems(resultadoBusqueda);
             }
         } else if(criterio.getValue().equals("Nombre")){
-            resultadoBusqueda = FDC.buscarCalleaNombre(parametro.getText());
+            resultadoBusqueda = FDC.buscarCalleaNombre(Validaciones.texto(parametro.getText(), "Nombre de calle", 120));
             if(resultadoBusqueda.isEmpty()){
                 mensajeOperacion = "No se encontraron resultados";
                 out_infoOperacion.fillProperty().set(colorAdvertencia);

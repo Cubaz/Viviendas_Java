@@ -13,6 +13,8 @@ import ObjetosBD.Propietario.JDPropietario;
 import ObjetosBD.Propietario.PropietarioBD;
 import ObjetosBD.Vivienda.JDVivienda;
 import ObjetosBD.Vivienda.ViviendaBD;
+import ObjetosBD.Vivienda.ViviendaService;
+import Validation.Validaciones;
 import javafx.animation.FadeTransition;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -32,10 +34,12 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 public class ViviendaController {
 
     private JDVivienda VDB;
+    private final ViviendaService servicio = new ViviendaService();
     private JDCalle CDB;
     private JDEdificio EDB;
     private JDDepartamento DDB;
@@ -55,7 +59,7 @@ public class ViviendaController {
     @FXML private TableColumn<ViviendaBD, String> colCalle;
     @FXML private TableColumn<ViviendaBD, Integer> colHabitantes;
     @FXML private TableColumn<ViviendaBD, Integer> colIdVivienda;
-    @FXML private TableColumn<ViviendaBD, Float> colMtsCuadrados;
+    @FXML private TableColumn<ViviendaBD, BigDecimal> colMtsCuadrados;
     @FXML private TableColumn<ViviendaBD, Integer> colNumExt;
     @FXML private TableColumn<ViviendaBD, Integer> colNumInt;
     @FXML private TableColumn<ViviendaBD, String> colTipoVivienda;
@@ -75,102 +79,55 @@ public class ViviendaController {
     void registrar_vivienda(ActionEvent event) {validar();
     }
 
-    private void validar(){
+    private record DatosVivienda(String tipo, int habitantes, int exterior, int interior,
+                                  int calle, BigDecimal metros, int propietario, Integer edificio, Integer piso) {}
 
-        String tipo;
-        int num_hab, numext, numint, mtscuadrados, num_piso = 0;
-
-
-        if(vivienda.getValue() == null){
-            System.out.println("Es necesario seleccionar el tipo de vivienda");
-            vivienda.requestFocus();
-            return;
+    private DatosVivienda leerDatos() {
+        String tipo = Validaciones.requerido(vivienda.getValue(), "Tipo de vivienda");
+        if (!vivienda.getItems().contains(tipo)) {
+            throw new IllegalArgumentException("Seleccione un tipo de vivienda válido");
         }
-
-        if(calle.getValue() == null){
-            System.out.println("Es necesario seleccionar una calle");
-            calle.requestFocus();
-            return;
+        int idCalle = Validaciones.requerido(calle.getValue(), "Calle").getId_calle();
+        int idPropietario = Validaciones.requerido(propietario.getValue(), "Propietario").getIdPersona();
+        int numHab = Validaciones.entero(habitantes.getText(), "Número de habitantes", 0, 65535);
+        int exterior = Validaciones.entero(num_ext.getText(), "Número exterior", 0, Integer.MAX_VALUE);
+        int interior = Validaciones.entero(num_int.getText(), "Número interior", 0, Integer.MAX_VALUE);
+        BigDecimal metros = Validaciones.decimalExacto(mts_cuadrados.getText(), "Metros cuadrados");
+        Integer idEdificio = null;
+        Integer numPiso = null;
+        if ("Departamento".equals(tipo)) {
+            idEdificio = Validaciones.requerido(edificio.getValue(), "Edificio").getIdEdificio();
+            numPiso = Validaciones.entero(piso.getText(), "Piso", 0, 65535);
         }
+        return new DatosVivienda(tipo, numHab, exterior, interior, idCalle, metros, idPropietario, idEdificio, numPiso);
+    }
 
-        if(habitantes.getText().isBlank()){
-            System.out.println("Es necesario especificar el número");
-            habitantes.requestFocus();
-            return;
-        }
+    private void validar() {
+        DatosVivienda d = leerDatos();
+        int id = servicio.crear(d.tipo(), d.habitantes(), d.exterior(), d.interior(), d.calle(),
+                d.metros(), d.propietario(), d.edificio(), d.piso());
+        limpiarFormulario();
+        tabla_vivienda.setItems(VDB.buscarViviendaTabla(id));
+        informar("Vivienda registrada correctamente. ID: " + id, colorExito);
+    }
 
-        if(num_ext.getText().isBlank()){
-            System.out.println("Es necesario indicar el número exterior");
-            num_ext.requestFocus();
-            return;
-        }
+    private void informar(String mensaje, Color color) {
+        out_infoOperacion.setFill(color);
+        out_infoOperacion.setText(mensaje);
+        out_infoOperacion.setVisible(true);
+    }
 
-        if(num_int.getText().isBlank()){
-            System.out.println("Es necesario indicar el número interior");
-            num_int.requestFocus();
-            return;
-        }
-
-        if(mts_cuadrados.getText().isBlank()){
-            System.out.println("Es necesario indicar los metros cuadrados construidos");
-            mts_cuadrados.requestFocus();
-            return;
-        }
-
-        if(vivienda.getValue().equals("Departamento")){
-            edificio.setDisable(true);
-            piso.setDisable(true);
-
-            if(edificio.getValue() == null){
-                System.out.println("Es necesario indicar el edificio de la vivienda");
-                edificio.requestFocus();
-                return;
-            }
-
-            if(piso.getText().isBlank()){
-                System.out.println("Es necesario indicar el piso de la vivienda");
-                piso.requestFocus();
-                return;
-            }else {
-                num_piso = Integer.parseInt(piso.getText());
-            }
-        }
-
-        tipo = vivienda.getValue();
-        CalleBD Calle = calle.getValue();
-        int idCalle = Calle.getId_calle();
-
-        num_hab = Integer.parseInt(habitantes.getText());
-        numext = Integer.parseInt(num_ext.getText());
-        numint = Integer.parseInt(num_int.getText());
-        mtscuadrados = Integer.parseInt(mts_cuadrados.getText());
-
-
-        int id = VDB.insertarVivienda(tipo, num_hab, numext, numint, idCalle, mtscuadrados);
-        if (id != -1) {
-            System.out.println("Registro exitoso \\nID de usuario: " + id);
-            if(tipo.equals("Departamento")){
-                EdificioBD Depa = edificio.getValue();
-                int idEdificio = Depa.getIdEdificio();
-                int ide = DDB.insertarDepartamento(idEdificio, id, num_piso);
-                if(ide != -1){
-                    System.out.println("Registro de departamento exitoso \\nID de edificio: " + ide);
-                }else{
-                    System.out.println("Error en el registro de DEPARTAMENTO");
-                }
-            }
-        } else {
-            System.out.println("Error en el registro de VIVIENDA");
-        }
-
-        PersonaBD Duenio = propietario.getValue();
-        int idPropietario = Duenio.getIdPersona();
-        int ideP = PRDB.insertarPropietario(id, idPropietario);
-        if(ideP !=-1){
-            System.out.println("Registro de propietario exitoso");
-        }else{
-            System.out.println("Error en el registro de PROPIETARIO");
-        }
+    private void limpiarFormulario() {
+        tabla_vivienda.getSelectionModel().clearSelection();
+        vivienda.setValue(null);
+        calle.setValue(null);
+        propietario.setValue(null);
+        edificio.setValue(null);
+        piso.clear();
+        habitantes.clear();
+        num_ext.clear();
+        num_int.clear();
+        mts_cuadrados.clear();
     }
 
     @FXML
@@ -185,16 +142,10 @@ public class ViviendaController {
         ObservableList<ViviendaBD> resultado = FXCollections.observableArrayList();
 
         if (criterio.getValue().equals("ID")) {
-            try {
-                int id = Integer.parseInt(parametro.getText());
-                resultado = VDB.buscarViviendaTabla(id);
-            } catch (NumberFormatException e) {
-                mensajeOperacion = "El ID debe ser numérico";
-                out_infoOperacion.setFill(colorAdvertencia);
-                out_infoOperacion.setText(mensajeOperacion);
-                return;
-            }
+            int id = Validaciones.entero(parametro.getText(), "ID de vivienda", 1, Integer.MAX_VALUE);
+            resultado = VDB.buscarViviendaTabla(id);
         }
+        limpiarFormulario();
 
         tabla_vivienda.setItems(resultado);
 
@@ -211,90 +162,32 @@ public class ViviendaController {
 
     @FXML
     void actualizar_vivienda(ActionEvent event) {
-        ViviendaBD seleccionada = tabla_vivienda.getSelectionModel().getSelectedItem();
-
-        if (seleccionada == null) {
-            mensajeOperacion = "Debe seleccionar una vivienda con doble clic";
-            out_infoOperacion.setFill(colorAdvertencia);
-            out_infoOperacion.setText(mensajeOperacion);
-            return;
-        }
-
-
-
-        if (habitantes.getText().isBlank() || num_ext.getText().isBlank() || num_int.getText().isBlank() || mts_cuadrados.getText().isBlank()) {
-            mensajeOperacion = "Debe llenar todos los campos";
-            out_infoOperacion.setFill(colorAdvertencia);
-            out_infoOperacion.setText(mensajeOperacion);
-            return;
-        }
-
-        String tipo = vivienda.getValue();
-        int numHab = Integer.parseInt(habitantes.getText());
-        int numExt = Integer.parseInt(num_ext.getText());
-        int numInt = Integer.parseInt(num_int.getText());
-        float metros = Float.parseFloat(mts_cuadrados.getText());
-        int idPropietario = propietario.getValue().getIdPersona();
-        int idEdificio = edificio.getValue().getIdEdificio();
-        int numPiso = Integer.parseInt(piso.getText());
-
-        CalleBD calleSeleccionada = calle.getValue();
-        if (calleSeleccionada == null) {
-            mensajeOperacion = "Debe seleccionar una calle";
-            out_infoOperacion.setFill(colorAdvertencia);
-            out_infoOperacion.setText(mensajeOperacion);
-            return;
-        }
-        int idCalle = calleSeleccionada.getId_calle();
-
-        boolean viviendaActualizada = VDB.actualizarVivienda(seleccionada.getId_vivienda(), tipo, numHab, numExt, numInt, idCalle, metros);
-        boolean propietarioActualizado = PRDB.actualizarPropietario(seleccionada.getId_vivienda(), idPropietario);
-        boolean departamentoActualizado = true;
-
-        if("Departamento".equals(tipo)){
-            DepartamentoBD dep = DDB.buscarDepartamentoVivienda(seleccionada.getId_vivienda());
-            if(dep != null) {
-                departamentoActualizado = DDB.actualizarDepartamento(dep.getId_departamento(), idEdificio, seleccionada.getId_vivienda(), numPiso);
-            }
-        }
-
-        if (viviendaActualizada && propietarioActualizado && departamentoActualizado) {
-            mensajeOperacion = "Vivienda actualizada correctamente";
-            out_infoOperacion.setFill(colorExito);
-            buscar_vivienda(null);
+        ViviendaBD seleccionada = Validaciones.requerido(
+                tabla_vivienda.getSelectionModel().getSelectedItem(), "Vivienda de la tabla");
+        DatosVivienda d = leerDatos();
+        boolean actualizado = servicio.actualizar(seleccionada.getId_vivienda(), d.tipo(), d.habitantes(),
+                d.exterior(), d.interior(), d.calle(), d.metros(), d.propietario(), d.edificio(), d.piso());
+        if (actualizado) {
+            limpiarFormulario();
+            tabla_vivienda.setItems(VDB.buscarViviendaTabla(seleccionada.getId_vivienda()));
+            informar("Vivienda actualizada correctamente", colorExito);
         } else {
-            mensajeOperacion = "No se pudo actualizar la vivienda";
-            out_infoOperacion.setFill(colorAdvertencia);
+            informar("No se pudo actualizar la vivienda; ya no existe", colorAdvertencia);
         }
-        out_infoOperacion.setText(mensajeOperacion);
     }
-
-
 
     @FXML
     void eliminar_vivienda(ActionEvent event) {
-        ViviendaBD seleccionada = tabla_vivienda.getSelectionModel().getSelectedItem();
-
-        if (seleccionada == null) {
-            mensajeOperacion = "Debe seleccionar una vivienda para eliminar";
-            out_infoOperacion.setFill(colorAdvertencia);
-            out_infoOperacion.setText(mensajeOperacion);
-            return;
-        }
-
-        boolean eliminado = VDB.eliminarVivienda(seleccionada.getId_vivienda());
-
-        if (eliminado) {
-            mensajeOperacion = "Vivienda eliminada correctamente";
-            out_infoOperacion.setFill(colorExito);
-            buscar_vivienda(null);
+        ViviendaBD seleccionada = Validaciones.requerido(
+                tabla_vivienda.getSelectionModel().getSelectedItem(), "Vivienda de la tabla");
+        if (servicio.eliminar(seleccionada.getId_vivienda())) {
+            tabla_vivienda.getItems().remove(seleccionada);
+            limpiarFormulario();
+            informar("Vivienda eliminada correctamente", colorExito);
         } else {
-            mensajeOperacion = "No se pudo eliminar la vivienda";
-            out_infoOperacion.setFill(colorAdvertencia);
+            informar("No se pudo eliminar la vivienda; ya no existe", colorAdvertencia);
         }
-        out_infoOperacion.setText(mensajeOperacion);
     }
-
 
     @FXML
     void initialize() {
@@ -317,33 +210,30 @@ public class ViviendaController {
             boolean esDepto = "Departamento".equals(newVal);
             edificio.setDisable(!esDepto);
             piso.setDisable(!esDepto);
+            if (!esDepto) {
+                edificio.setValue(null);
+                piso.clear();
+            }
         });
 
         criterio.getItems().addAll("ID");
         configurarTablaBusqueda();
 
 
-        tabla_vivienda.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                ViviendaBD seleccionada = tabla_vivienda.getSelectionModel().getSelectedItem();
-
-                if (seleccionada != null) {
-                    vivienda.setValue(seleccionada.getTipo());
-                    habitantes.setText(String.valueOf(seleccionada.getNum_habitantes()));
-                    num_ext.setText(String.valueOf(seleccionada.getNum_ext()));
-                    num_int.setText(String.valueOf(seleccionada.getNum_int()));
-                    mts_cuadrados.setText(String.valueOf(seleccionada.getMts_cuadrados()));
-
-                    for (CalleBD c : calle.getItems()) {
-                        if (c.getId_calle() == seleccionada.getIdCalle()) {
-                            calle.setValue(c);
-                            break;
-                        }
-                    }
-                    llenarCamposRelacionados(seleccionada.getId_vivienda());
-
-                }
-            }
+        tabla_vivienda.getSelectionModel().selectedItemProperty().addListener((obs, anterior, seleccionada) -> {
+            if (seleccionada == null) return;
+            calle.setValue(null);
+            propietario.setValue(null);
+            edificio.setValue(null);
+            piso.clear();
+            vivienda.setValue(seleccionada.getTipo());
+            habitantes.setText(String.valueOf(seleccionada.getNum_habitantes()));
+            num_ext.setText(String.valueOf(seleccionada.getNum_ext()));
+            num_int.setText(String.valueOf(seleccionada.getNum_int()));
+            mts_cuadrados.setText(seleccionada.getMtsCuadradosExactos().toPlainString());
+            calle.getItems().stream().filter(c -> c.getId_calle() == seleccionada.getIdCalle())
+                    .findFirst().ifPresent(calle::setValue);
+            llenarCamposRelacionados(seleccionada.getId_vivienda());
         });
     }
 
@@ -353,7 +243,7 @@ public class ViviendaController {
          colHabitantes.setCellValueFactory(data->new SimpleObjectProperty<>(data.getValue().getNum_habitantes()));
          colNumExt.setCellValueFactory(data->new SimpleObjectProperty<>(data.getValue().getNum_ext()));
          colNumInt.setCellValueFactory(data->new SimpleObjectProperty<>(data.getValue().getNum_int()));
-         colMtsCuadrados.setCellValueFactory(data->new SimpleObjectProperty<>(data.getValue().getMts_cuadrados()));
+         colMtsCuadrados.setCellValueFactory(data->new SimpleObjectProperty<>(data.getValue().getMtsCuadradosExactos()));
          colCalle.setCellValueFactory(data-> new SimpleObjectProperty<>(data.getValue().getIdCalle()).asString());
     }
 

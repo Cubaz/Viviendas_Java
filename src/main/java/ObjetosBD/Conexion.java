@@ -1,58 +1,38 @@
 package ObjetosBD;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
-import javax.swing.JOptionPane;
 import java.sql.SQLException;
 
-public class Conexion {
+/** Cada operación es propietaria de su conexión y debe cerrarla con try-with-resources. */
+public class Conexion implements AutoCloseable {
+    private Connection cnx;
 
-    private static Connection cnx;
-    private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
-    private static final String BD = "viviendas";
-    private static final String USER = "root";
-    //Cambios de Said (prometo que sin esto no corría xd)
-    private static final String PASS = "root";
-
-    //private static final String PASS = "root";
-    private static final String URL = "jdbc:mysql://localhost:3306/" + BD + "?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
-
-
-    public Conexion(){
-        cnx = null;
-    }
-
-    /// MÉTODO QUE VERIFICA LA CONEXIÓN A LA BD
-    public Connection getConexion(){
-        cnx=null;
-        try{
-            Class.forName(DRIVER);
-            cnx =(Connection)DriverManager.getConnection(URL, USER, PASS);
-        }catch(ClassNotFoundException e){
-            JOptionPane.showMessageDialog(null, "NO SE PUDO REALIZAR LA CONVERSION DE CLASE" + e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
-            System.exit(0);
-        }catch(SQLException e){
-            JOptionPane.showMessageDialog(null, "ERROR DE CONEXION" + e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
-            System.exit(0);
+    public Connection getConexion() throws SQLException {
+        if (cnx == null || cnx.isClosed()) {
+            cnx = DriverManager.getConnection(
+                    configuracion("viviendas.db.url", "VIVIENDAS_DB_URL",
+                            "jdbc:mysql://localhost:3306/viviendas?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&connectTimeout=5000&socketTimeout=10000"),
+                    configuracion("viviendas.db.user", "VIVIENDAS_DB_USER", "root"),
+                    configuracion("viviendas.db.password", "VIVIENDAS_DB_PASSWORD", "root"));
         }
         return cnx;
     }
 
-    /// MÉTODO QUE CIERRA LA CONEXIÓN A LA BD
-    public void close(){
-        try{
-            cnx.close();
-        }catch(SQLException e){
-            JOptionPane.showMessageDialog(null, "Error al cerrar la conexion\n"+ e.getMessage(), "ERROR", 2);
-        }
+    private static String configuracion(String propiedad, String entorno, String defecto) {
+        String valor = System.getProperty(propiedad);
+        if (valor == null) valor = System.getenv(entorno);
+        return valor == null ? defecto : valor;
     }
 
-    /// MÉTODO QUE EJECUTA LA CLASE Y QUE IMPRIME CUANDO LA CONEXIÓN ES O NO EXITOSA
-    public static void main(String[] args){
-        Conexion cnx = new Conexion();
-        if(cnx.getConexion() != null){
-            System.out.println("Conexion exitosa");
-        }else{
-            System.out.println("No se pudo conectar a la BD");
+    @Override
+    public void close() throws SQLException {
+        if (cnx != null) { cnx.close(); cnx = null; }
+    }
+
+    public static void main(String[] args) throws SQLException {
+        try (var conexion = new Conexion(); var connection = conexion.getConexion()) {
+            System.out.println(connection.isValid(5) ? "Conexión exitosa" : "No se pudo conectar a la BD");
         }
     }
 }

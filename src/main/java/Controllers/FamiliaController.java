@@ -1,4 +1,6 @@
 package Controllers;
+
+import Validation.Validaciones;
 import ObjetosBD.Colonia.ColoniaBD;
 import ObjetosBD.Familia.FamiliaBD;
 import javafx.animation.FadeTransition;
@@ -96,22 +98,19 @@ public class FamiliaController {
         FamiliaBD seleccionada = tabla_familia.getSelectionModel().getSelectedItem();
 
         if (seleccionada == null) {
-            mensajeOperacion = "Debe seleccionar una colonia con doble clic";
+            mensajeOperacion = "Debe seleccionar una familia con doble clic";
             out_infoOperacion.fillProperty().set(colorAdvertencia);
             mostrarInfoOperacion();
             return;
         }
 
-        if (apellidos.getText().isBlank()) {
-            mensajeOperacion = "El nombre no puede estar vacío";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
-            return;
-        }
+        apellidos.setText(Validaciones.texto(apellidos.getText(), "Apellidos", 120));
 
         boolean actualizado = FDB.actualizarFamilia(seleccionada.getId(), apellidos.getText());
 
         if (actualizado) {
+            seleccionada.setApellidos(apellidos.getText());
+            tabla_familia.refresh();
             mensajeOperacion = "Familia actualizada correctamente";
             out_infoOperacion.fillProperty().set(colorExito);
         } else {
@@ -146,7 +145,7 @@ public class FamiliaController {
         ObservableList<FamiliaBD> resultadoBusqueda = FXCollections.observableArrayList();
 
         if(criterio.getValue().equals("ID")){
-            int busqueda = Integer.parseInt(parametro.getText());
+            int busqueda = Validaciones.entero(parametro.getText(), "ID", 1, Integer.MAX_VALUE);
             resultadoBusqueda = FDB.buscarFamiliaIDTABLA(busqueda);
             if(resultadoBusqueda.isEmpty()){
                 mensajeOperacion = "No se encontraron resultados";
@@ -157,7 +156,7 @@ public class FamiliaController {
                 tabla_familia.setItems(resultadoBusqueda);
             }
         } else if(criterio.getValue().equals("Nombre")){
-            resultadoBusqueda = FDB.buscarFamiliaApellidos(parametro.getText());
+            resultadoBusqueda = FDB.buscarFamiliaApellidos(Validaciones.texto(parametro.getText(), "Apellidos", 120));
             if(resultadoBusqueda.isEmpty()){
                 mensajeOperacion = "No se encontraron resultados";
                 out_infoOperacion.fillProperty().set(colorAdvertencia);
@@ -192,7 +191,10 @@ public class FamiliaController {
             out_infoOperacion.fillProperty().set(colorExito);
 
 
+            String mensajeExito = mensajeOperacion;
             buscar_familia(null);
+            mensajeOperacion = mensajeExito;
+            out_infoOperacion.setFill(colorExito);
 
 
             apellidos.clear();
@@ -209,20 +211,19 @@ public class FamiliaController {
 
     private void validar(){
         String apellido;
-        if(apellidos.getText().isBlank()){
-            System.out.println("El apellido parterno es necesario");
-            apellidos.requestFocus();
-            return;
-        }
+        apellidos.setText(Validaciones.texto(apellidos.getText(), "Apellidos", 120));
        apellido = apellidos.getText();
 
         int id= FDB.insertarFamilia(apellido);
-        if(id != -1){
-            System.out.println("Registro exitoso \\nID de usuario:" + id);
+        if(id > 0){
+            mensajeOperacion = "Familia registrada. ID: " + id;
+            out_infoOperacion.setFill(colorExito);
             apellidos.clear();
-        }else{
-            System.out.println("Error en el registro de FAMILIA");
+        } else {
+            mensajeOperacion = "Error en el registro de familia";
+            out_infoOperacion.setFill(colorAdvertencia);
         }
+        mostrarInfoOperacion();
     }
 
     private void configurarTablaBusqueda(){

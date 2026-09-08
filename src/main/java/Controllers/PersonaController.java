@@ -1,5 +1,7 @@
 package Controllers;
 
+import Validation.Validaciones;
+
 import ObjetosBD.Familia.FamiliaBD;
 import ObjetosBD.Familia.JDFamilia;
 import ObjetosBD.Persona.JDPersona;
@@ -108,6 +110,11 @@ public class PersonaController {
         initPadrePane();
     }
 
+    private void recargarPersonas() {
+        in_idPersona.setItems(DBPersona.obtenerPersona());
+        field_idPersonaActualizar.setItems(DBPersona.obtenerPersona());
+    }
+
     private void initPadrePane() {
         padrePane.put(pane_inicio, pane_inicio);
         padrePane.put(pane_entrada, pane_inicio);
@@ -147,11 +154,15 @@ public class PersonaController {
     }
 
     private void operacionSeleccionada() {
+        recargarPersonas();
+        personaBD = null;
+        familiaBD = null;
+        combo_familiaActualizar.setValue(null);
         btn_entrada.setText(opSeleccionada.getTextoBoton());
-        in_idPersona.getSelectionModel().clearSelection();
+        in_idPersona.setValue(null);
         in_nombre.clear();
         in_edad.clear();
-        in_comboFamilia.getSelectionModel().clearSelection();
+        in_comboFamilia.setValue(null);
 
         // Para Crear y Buscar mostramos campos extras.
         // En Borrar y Actualizar solo pedimos el ID inicialmente.
@@ -243,19 +254,21 @@ public class PersonaController {
     }
 
     private void operacionCrear() {
-        int idGenerado = DBPersona.insertarPersona(in_nombre.getText(), in_comboFamilia.getValue().getId(), Integer.parseInt(in_edad.getText()));
-        if(idGenerado != -1){
+        int idGenerado = DBPersona.insertarPersona(in_nombre.getText(), in_comboFamilia.getValue().getId(), Validaciones.entero(in_edad.getText(), "Edad", 0, 150));
+        if(idGenerado > 0){
             mostrarInfoOperacion("Persona creada con ID: " + idGenerado, colorExito);
             in_nombre.clear();
             in_edad.clear();
-            in_comboFamilia.getSelectionModel().clearSelection();
+            in_comboFamilia.setValue(null);
         } else {
             mostrarInfoOperacion("Error al crear la persona", colorAdvertencia);
         }
+        recargarPersonas();
         cambiarPane(pane_confirmacion, pane_entrada);
     }
 
     private void operacionActualizar() {
+        if(!validarIdPersona(field_idPersonaActualizar)) return;
         if(!validarNombre(field_nombreActualizar)) return;
         if(!validarEdad(field_edadActualizar)) return;
         if(!validarFamilia(combo_familiaActualizar)) return;
@@ -264,7 +277,7 @@ public class PersonaController {
                 field_idPersonaActualizar.getValue().getIdPersona(),
                 field_nombreActualizar.getText(),
                 combo_familiaActualizar.getValue().getId(),
-                Integer.parseInt(field_edadActualizar.getText())
+                Validaciones.entero(field_edadActualizar.getText(), "Edad", 0, 150)
         );
 
         if(exito){
@@ -272,6 +285,7 @@ public class PersonaController {
         } else {
             mostrarInfoOperacion("Error al actualizar la persona", colorAdvertencia);
         }
+        recargarPersonas();
         cambiarPane(pane_actualizar, pane_entrada);
     }
 
@@ -282,21 +296,23 @@ public class PersonaController {
         } else {
             mostrarInfoOperacion("Error al borrar la persona", colorAdvertencia);
         }
+        recargarPersonas();
         cambiarPane(pane_confirmacion, pane_entrada);
     }
 
     private void operacionBuscar() {
+        tabla_busquedaPersona.getItems().clear();
         Integer id = null;
         if(in_idPersona.getValue() != null){
             id = in_idPersona.getValue().getIdPersona();
         }
-        String nombre = in_nombre.getText();
+        String nombre = in_nombre.getText().isBlank() ? null : Validaciones.texto(in_nombre.getText(), "Nombre", 100);
         Integer edad = null;
-        if(!in_edad.getText().isEmpty() && in_edad.getText().matches("[0-9]+")) edad = Integer.parseInt(in_edad.getText());
+        if(!in_edad.getText().isBlank()) edad = Validaciones.entero(in_edad.getText(), "Edad", 0, 150);
         Integer idFam = (in_comboFamilia.getValue() != null) ? in_comboFamilia.getValue().getId() : null;
 
         ObservableList<Map<String, Object>> resultados = DBPersona.buscarPersonas(id, nombre, idFam, edad);
-        if(resultados != null){
+        if(resultados != null && !resultados.isEmpty()){
             tabla_busquedaPersona.setItems(resultados);
             mostrarInfoOperacion("Resultados encontrados: " + resultados.size(), colorExito);
             cambiarPane(pane_entrada, pane_resultadoBusqueda);
@@ -336,20 +352,12 @@ public class PersonaController {
     }
 
     private boolean validarNombre(TextField field) {
-        if(field.getText().isBlank()){
-            mostrarInfoOperacion("El nombre es obligatorio", colorAdvertencia);
-            field.requestFocus();
-            return false;
-        }
+        field.setText(Validaciones.texto(field.getText(), "Nombre", 100));
         return true;
     }
 
     private boolean validarEdad(TextField field) {
-        if(field.getText().isBlank() || !field.getText().matches("[0-9]+")){
-            mostrarInfoOperacion("La edad debe ser un número", colorAdvertencia);
-            field.requestFocus();
-            return false;
-        }
+        Validaciones.entero(field.getText(), "Edad", 0, 150);
         return true;
     }
 

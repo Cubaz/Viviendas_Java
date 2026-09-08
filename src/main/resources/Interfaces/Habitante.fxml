@@ -15,7 +15,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="673.0" prefWidth="900.0" style="-fx-background-color: #cc3a63;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.HabitanteController">
+<AnchorPane prefHeight="673.0" prefWidth="900.0" style="-fx-background-color: #cc3a63;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.HabitanteController">
    <children>
       <Button fx:id="btn_menuPrincipal" layoutX="20.0" layoutY="24.0" mnemonicParsing="false" onAction="#volverMenuPrincipal" prefHeight="27.0" prefWidth="126.0" style="-fx-background-color: #FFF7EB;" text="Menú principal" textFill="#540707">
          <font>
@@ -135,7 +135,7 @@
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="352.0" prefWidth="788.0">
                      <children>
-                        <TableView fx:id="tabla_busquedaHabitante" prefHeight="470.0" prefWidth="794.0" style="-fx-background-color: 0;">
+                        <TableView fx:id="tabla_busquedaHabitante" prefHeight="470.0" prefWidth="794.0" style="-fx-background-color: transparent;">
                            <columns>
                               <TableColumn fx:id="colIdPersona" prefWidth="66.39999085664749" text="IdPersona" />
                               <TableColumn fx:id="colNombre" prefWidth="121.0" text="Nombre" />
@@ -157,7 +157,7 @@
       </AnchorPane>
       <AnchorPane fx:id="pane_confirmacion" layoutX="35.0" layoutY="120.0" prefHeight="468.0" prefWidth="830.0" visible="false">
          <children>
-            <Text fill="#f9f0e0" layoutX="79.0" layoutY="35.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-weight: 3;" text="DATOS DE LA PERSONA">
+            <Text fill="#f9f0e0" layoutX="79.0" layoutY="35.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-weight: normal;" text="DATOS DE LA PERSONA">
                <font>
                   <Font name="CocogooseProTrial Darkmode" size="20.0" />
                </font>
@@ -183,7 +183,7 @@
                   <Font name="CocogooseProTrial Light" size="19.0" />
                </font>
             </TextField>
-            <Text fill="#f9f0e0" layoutX="79.0" layoutY="230.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-weight: 3;" text="DATOS DE LA VIVIENDA">
+            <Text fill="#f9f0e0" layoutX="79.0" layoutY="230.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-weight: normal;" text="DATOS DE LA VIVIENDA">
                <font>
                   <Font name="CocogooseProTrial Darkmode" size="20.0" />
                </font>

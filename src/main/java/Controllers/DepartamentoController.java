@@ -1,5 +1,7 @@
 package Controllers;
 
+import Validation.Validaciones;
+
 import ObjetosBD.Edificio.EdificioBD;
 import ObjetosBD.Edificio.JDEdificio;
 import ObjetosBD.Vivienda.JDVivienda;
@@ -122,6 +124,11 @@ public class DepartamentoController {
         configurarTablaBusqueda();
     }
 
+    private void recargarDepartamentos() {
+        in_idDepartamento.setItems(DBDepartamento.obtenerDepartamento());
+        field_idDepartamentoActualizar.setItems(DBDepartamento.obtenerDepartamento());
+    }
+
     private void initPadrePane() {
         padrePane.put(pane_inicio, pane_inicio);
         padrePane.put(pane_entrada, pane_inicio);
@@ -161,6 +168,12 @@ public class DepartamentoController {
     }
 
     private void prepararPaneEntrada() {
+        recargarDepartamentos();
+        departamentoBD = null;
+        edificioBD = null;
+        viviendaBD = null;
+        field_idEdificioActualizar.setValue(null);
+        field_idViviendaActualizar.setValue(null);
         btn_entrada.setText(opSeleccionada.getTextoBoton());
         limpiarCamposEntrada();
 
@@ -191,9 +204,9 @@ public class DepartamentoController {
     }
 
     private void limpiarCamposEntrada() {
-        in_idDepartamento.getSelectionModel().clearSelection();
-        in_idEdificio.getSelectionModel().clearSelection();
-        in_idVivienda.getSelectionModel().clearSelection();
+        in_idDepartamento.setValue(null);
+        in_idEdificio.setValue(null);
+        in_idVivienda.setValue(null);
         in_piso.clear();
     }
 
@@ -262,12 +275,13 @@ public class DepartamentoController {
             out_idDepartamentoRegistro.setText(departamentoBD != null ? String.valueOf(departamentoBD.getId_departamento()) : (in_idDepartamento.getValue() != null ? String.valueOf(in_idDepartamento.getValue().getId_departamento()) : "N/A"));
         }
         out_edificioRegistro.setText(edificioBD != null ? edificioBD.getNombre() : "N/A");
-        out_pisoRegistro.setText(departamentoBD != null ? String.valueOf(departamentoBD.getPiso()) : in_piso.getText());
+        out_pisoRegistro.setText(opSeleccionada != operacionDepartamento.CREAR && departamentoBD != null ? String.valueOf(departamentoBD.getPiso()) : in_piso.getText());
         out_idViviendaRegistro.setText(viviendaBD != null ? String.valueOf(viviendaBD.getId_vivienda()) : (in_idVivienda.getValue() != null ? String.valueOf(in_idVivienda.getValue().getId_vivienda()) : "N/A"));
         out_tipoVivRegistro.setText(viviendaBD != null ? viviendaBD.getTipo() : "N/A");
     }
 
     private boolean validarCamposCrear() {
+        Validaciones.entero(in_piso.getText(), "Piso", 0, 65535);
         if (in_idEdificio.getValue() == null) {
             mostrarInfoOperacion("Debe seleccionar un edificio", colorAdvertencia);
             return false;
@@ -306,13 +320,14 @@ public class DepartamentoController {
     }
 
     private void operacionBuscar() {
+        tabla_busquedaDepartamento.getItems().clear();
         Integer idDep = in_idDepartamento.getValue() == null ? null : in_idDepartamento.getValue().getId_departamento();
         Integer idEdi = in_idEdificio.getValue() == null ? null : in_idEdificio.getValue().getIdEdificio();
         Integer idViv = in_idVivienda.getValue() == null ? null : in_idVivienda.getValue().getId_vivienda();
-        Integer piso = in_piso.getText().isBlank() ? null : Integer.parseInt(in_piso.getText());
+        Integer piso = in_piso.getText().isBlank() ? null : Validaciones.entero(in_piso.getText(), "Piso", 0, 65535);
 
         ObservableList<Map<String, Object>> resultados = DBDepartamento.buscarDepartamentos(idDep, idEdi, idViv, piso);
-        if (resultados != null) {
+        if (resultados != null && !resultados.isEmpty()) {
             tabla_busquedaDepartamento.setItems(resultados);
             cambiarPane(pane_entrada, pane_resultadoBusqueda);
             mostrarInfoOperacion("Resultados encontrados: " + resultados.size(), colorExito);
@@ -328,14 +343,15 @@ public class DepartamentoController {
                 int idGenerado = DBDepartamento.insertarDepartamento(
                         in_idEdificio.getValue().getIdEdificio(),
                         in_idVivienda.getValue().getId_vivienda(),
-                        Integer.parseInt(in_piso.getText())
+                        Validaciones.entero(in_piso.getText(), "Piso", 0, 65535)
                 );
-                if (idGenerado != -1) {
+                if (idGenerado > 0) {
                     mostrarInfoOperacion("Departamento creado. ID: " + idGenerado, colorExito);
                     limpiarCamposEntrada();
                 } else {
                     mostrarInfoOperacion("Error al crear departamento", colorAdvertencia);
                 }
+                recargarDepartamentos();
                 cambiarPane(pane_confirmacion, pane_entrada);
                 break;
             case ACTUALIZAR:
@@ -355,13 +371,14 @@ public class DepartamentoController {
                         field_idDepartamentoActualizar.getValue().getId_departamento(),
                         field_idEdificioActualizar.getValue().getIdEdificio(),
                         field_idViviendaActualizar.getValue().getId_vivienda(),
-                        Integer.parseInt(field_pisoActualizar.getText())
+                        Validaciones.entero(field_pisoActualizar.getText(), "Piso", 0, 65535)
                 );
                 if (ok) {
                     mostrarInfoOperacion("Departamento actualizado correctamente", colorExito);
                 } else {
                     mostrarInfoOperacion("Error al actualizar departamento", colorAdvertencia);
                 }
+                recargarDepartamentos();
                 cambiarPane(pane_actualizar, pane_entrada);
                 break;
             case BORRAR:
@@ -371,6 +388,7 @@ public class DepartamentoController {
                 } else {
                     mostrarInfoOperacion("Error al eliminar departamento", colorAdvertencia);
                 }
+                recargarDepartamentos();
                 cambiarPane(pane_confirmacion, pane_entrada);
                 break;
         }

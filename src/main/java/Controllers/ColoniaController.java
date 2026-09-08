@@ -1,5 +1,7 @@
 package Controllers;
 
+import Validation.Validaciones;
+
 import ObjetosBD.Colonia.ColoniaBD;
 import ObjetosBD.Colonia.JDColonia;
 import javafx.animation.FadeTransition;
@@ -59,18 +61,12 @@ public class ColoniaController {
     // Registrar colonia
     @FXML
     void registrar_colonia(ActionEvent event) {
-        if(nom_col.getText().isBlank()){
-            mensajeOperacion = "El nombre de la colonia es necesario";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
-            nom_col.requestFocus();
-            return;
-        }
+        nom_col.setText(Validaciones.texto(nom_col.getText(), "Nombre de colonia", 120));
 
         String nombre = nom_col.getText();
         int id = CDB.insertarColonia(nombre);
 
-        if(id != 1){
+        if(id > 0){
             mensajeOperacion = "Registro exitoso. ID: " + id;
             out_infoOperacion.fillProperty().set(colorExito);
             nom_col.clear();
@@ -103,7 +99,7 @@ public class ColoniaController {
         ObservableList<ColoniaBD> resultadoBusqueda = FXCollections.observableArrayList();
 
         if(criterio.getValue().equals("ID")){
-            int busqueda = Integer.parseInt(parametro.getText());
+            int busqueda = Validaciones.entero(parametro.getText(), "ID", 1, Integer.MAX_VALUE);
             resultadoBusqueda = CDB.buscarColoniaID(busqueda);
             if(resultadoBusqueda.isEmpty()){
                 mensajeOperacion = "No se encontraron resultados";
@@ -114,7 +110,7 @@ public class ColoniaController {
                 tabla_colonia.setItems(resultadoBusqueda);
             }
         } else if(criterio.getValue().equals("Nombre")){
-            resultadoBusqueda = CDB.buscarColoniaNombre(parametro.getText());
+            resultadoBusqueda = CDB.buscarColoniaNombre(Validaciones.texto(parametro.getText(), "Nombre de colonia", 120));
             if(resultadoBusqueda.isEmpty()){
                 mensajeOperacion = "No se encontraron resultados";
                 out_infoOperacion.fillProperty().set(colorAdvertencia);
@@ -140,16 +136,13 @@ public class ColoniaController {
             return;
         }
 
-        if (nom_col.getText().isBlank()) {
-            mensajeOperacion = "El nombre no puede estar vacío";
-            out_infoOperacion.fillProperty().set(colorAdvertencia);
-            mostrarInfoOperacion();
-            return;
-        }
+        nom_col.setText(Validaciones.texto(nom_col.getText(), "Nombre de colonia", 120));
 
-        boolean actualizado = CDB.actualizarColonia(seleccionada.getId_colonia(), nom_col.getText(), 0.0f);
+        boolean actualizado = CDB.actualizarColonia(seleccionada.getId_colonia(), nom_col.getText());
 
         if (actualizado) {
+            seleccionada.setNombre(nom_col.getText());
+            tabla_colonia.refresh();
             mensajeOperacion = "Colonia actualizada correctamente";
             out_infoOperacion.fillProperty().set(colorExito);
         } else {
@@ -211,7 +204,10 @@ public class ColoniaController {
             out_infoOperacion.fillProperty().set(colorExito);
 
 
+            String mensajeExito = mensajeOperacion;
             buscar_colonia(null);
+            mensajeOperacion = mensajeExito;
+            out_infoOperacion.setFill(colorExito);
 
 
             nom_col.clear();

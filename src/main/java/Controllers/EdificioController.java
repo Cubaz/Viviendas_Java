@@ -1,5 +1,7 @@
 package Controllers;
 
+import Validation.Validaciones;
+
 import ObjetosBD.Edificio.EdificioBD;
 import ObjetosBD.Edificio.JDEdificio;
 import javafx.animation.FadeTransition;
@@ -94,6 +96,11 @@ public class EdificioController {
         configurarTablaBusqueda();
     }
 
+    private void recargarEdificios() {
+        in_idEdificio.setItems(DBEdificio.obtenerEdificio());
+        field_idEdificioActualizar.setItems(DBEdificio.obtenerEdificio());
+    }
+
     private void initPadrePane() {
         padrePane.put(pane_inicio, pane_inicio);
         padrePane.put(pane_entrada, pane_inicio);
@@ -132,8 +139,10 @@ public class EdificioController {
     }
 
     private void prepararEntrada() {
+        recargarEdificios();
+        edificioBD = null;
         btn_entrada.setText(opSeleccionada.getTextoBoton());
-        in_idEdificio.getSelectionModel().clearSelection();
+        in_idEdificio.setValue(null);
         in_nombreEdificio.clear();
         out_infoOperacion.setVisible(false);
 
@@ -193,11 +202,12 @@ public class EdificioController {
     }
 
     private void operacionBuscar() {
+        tabla_busquedaEdificio.getItems().clear();
         Integer id = (in_idEdificio.getValue() != null) ? in_idEdificio.getValue().getIdEdificio() : null;
-        String nombre = in_nombreEdificio.getText().isBlank() ? null : in_nombreEdificio.getText();
+        String nombre = in_nombreEdificio.getText().isBlank() ? null : Validaciones.texto(in_nombreEdificio.getText(), "Nombre de edificio", 120);
 
         ObservableList<Map<String, Object>> resultados = DBEdificio.buscarEdificios(id, nombre);
-        if (resultados != null) {
+        if (resultados != null && !resultados.isEmpty()) {
             tabla_busquedaEdificio.getItems().clear();
             tabla_busquedaEdificio.setItems(resultados);
             cambiarPane(pane_entrada, pane_resultadoBusqueda);
@@ -211,7 +221,7 @@ public class EdificioController {
     void ejecutarOperacionConfirmacion(ActionEvent event) {
         if (opSeleccionada == operacionEdificio.CREAR) {
             int id = DBEdificio.insertarEdificio(in_nombreEdificio.getText());
-            if (id != -1) {
+            if (id > 0) {
                 mostrarInfoOperacion("Edificio creado. ID: " + id, colorExito);
                 in_nombreEdificio.clear();
             } else {
@@ -224,18 +234,18 @@ public class EdificioController {
                 mostrarInfoOperacion("Error al borrar edificio", colorAdvertencia);
             }
         }
+        recargarEdificios();
         cambiarPane(pane_confirmacion, pane_entrada);
     }
 
     @FXML
     void ejecutarOperacionActualizar(ActionEvent event) {
-        if (field_nombreEdificioActualizar.getText().isBlank()) {
-            mostrarInfoOperacion("El nombre es necesario", colorAdvertencia);
-            return;
-        }
+        if (!validarId(field_idEdificioActualizar)) return;
+        field_nombreEdificioActualizar.setText(Validaciones.texto(field_nombreEdificioActualizar.getText(), "Nombre de edificio", 120));
 
         if (DBEdificio.actualizarEdificio(field_idEdificioActualizar.getValue().getIdEdificio(), field_nombreEdificioActualizar.getText())) {
             mostrarInfoOperacion("Edificio actualizado correctamente", colorExito);
+            recargarEdificios();
             cambiarPane(pane_actualizar, pane_entrada);
         } else {
             mostrarInfoOperacion("Error al actualizar edificio", colorAdvertencia);
@@ -287,11 +297,7 @@ public class EdificioController {
     }
 
     private boolean validarCamposCrear() {
-        if (in_nombreEdificio.getText().isBlank()) {
-            mostrarInfoOperacion("El nombre es necesario", colorAdvertencia);
-            in_nombreEdificio.requestFocus();
-            return false;
-        }
+        in_nombreEdificio.setText(Validaciones.texto(in_nombreEdificio.getText(), "Nombre de edificio", 120));
         return true;
     }
 
