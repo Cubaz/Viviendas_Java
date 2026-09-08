@@ -46,25 +46,47 @@ enum operacion{
 
 public class HabitanteController {
     //Componentes generales
-    @FXML private Button btn_menuPrincipal;
-    @FXML private AnchorPane pane_inicio;
+    @FXML
+    private Button btn_menuPrincipal;
+    @FXML
+    private AnchorPane pane_inicio;
 
-    @FXML private Text out_infoOperacion;
-    @FXML private AnchorPane pane_entrada;
-    @FXML private TextField in_idPersona;
-    @FXML private Text txt_viviendaEntrada;
-    @FXML private TextField in_idVivienda;
-    @FXML private Text txt_rolEntrada;
-    @FXML private ComboBox<String> in_comboRol;
-    @FXML private Button btn_entrada;
+    @FXML
+    private Text out_infoOperacion;
+    @FXML
+    private AnchorPane pane_entrada;
+    @FXML
+    private ComboBox<PersonaBD> in_idPersona;
+    @FXML
+    private Text txt_viviendaEntrada;
+    @FXML
+    private ComboBox<ViviendaBD> in_idVivienda;
+    @FXML
+    private Text txt_rolEntrada;
+    @FXML
+    private ComboBox<String> in_comboRol;
+    @FXML
+    private Button btn_entrada;
 
-    @FXML private Button btn_confirmacion;
-    @FXML private AnchorPane pane_confirmacion;
-    @FXML private Button btn_volver;
+    @FXML
+    private Button btn_confirmacionActualizar;
+    @FXML
+    private Button btn_confirmacionCrear;
+    @FXML
+    private AnchorPane pane_confirmacion;
+    @FXML
+    private Button btn_volver;
 
     //JavaFX - Eventos Generales
-    @FXML public void initialize() {
+    @FXML
+    public void initialize() {
         pane_actual = pane_inicio;
+
+        in_idPersona.setItems(DBPersona.obtenerPersona());
+        in_idVivienda.setItems(DBVivienda.obtenerVivienda());
+
+        field_idPersonaActualizar.setItems(DBPersona.obtenerPersona());
+        field_idViviendaActualizar.setItems(DBVivienda.obtenerVivienda());
 
         in_comboRol.getItems().addAll(
                 "Jefe Casa",
@@ -92,37 +114,42 @@ public class HabitanteController {
         initPadrePane();
     }
 
-    @FXML void elegirOpcionActualizar(ActionEvent event) {
+    @FXML
+    void elegirOpcionActualizar(ActionEvent event) {
         opSeleccionada = operacion.ACTUALIZAR;
         operacionSeleccionada();
     }
 
-    @FXML void elegirOpcionBorrar(ActionEvent event) {
+    @FXML
+    void elegirOpcionBorrar(ActionEvent event) {
         opSeleccionada = operacion.BORRAR;
         operacionSeleccionada();
     }
 
-    @FXML void elegirOpcionBuscar(ActionEvent event) {
+    @FXML
+    void elegirOpcionBuscar(ActionEvent event) {
         opSeleccionada = operacion.BUSCAR;
         operacionSeleccionada();
     }
 
-    @FXML void elegirOpcionCrear(ActionEvent event) {
+    @FXML
+    void elegirOpcionCrear(ActionEvent event) {
         opSeleccionada = operacion.CREAR;
         operacionSeleccionada();
     }
 
-    @FXML void ejecutarOperacionEntrada(ActionEvent event) {
+    @FXML
+    void ejecutarOperacionEntrada(ActionEvent event) {
         switch (opSeleccionada) {
             case CREAR:
-                if(!validarCamposCorrectos()) return;
+                if (!validarCamposCorrectos()) return;
 
-                if(!existePersona(Integer.parseInt(in_idPersona.getText()))) return;
-                if(!existeVivienda(Integer.parseInt(in_idVivienda.getText()))) return;
+                personaBD = in_idPersona.getValue();
+                viviendaBD = in_idVivienda.getValue();
                 calleBD = DBCalle.buscarCalleID(viviendaBD.getIdCalle());
 
                 cargarPaneDatosHabitante();
-                btn_confirmacion.setText("Crear habitante");
+                btn_confirmacionCrear.setText("Crear habitante");
                 cambiarPane(pane_entrada, pane_confirmacion);
                 break;
 
@@ -132,44 +159,63 @@ public class HabitanteController {
                 break;
 
             case ACTUALIZAR:
-                habitanteBD = DBHabitante.buscarHabitante(Integer.parseInt(in_idPersona.getText()));
-                if(habitanteBD == null){
+                if (in_idPersona.getValue() == null) {
+                    mostrarInfoOperacion("Debe seleccionar una persona", colorAdvertencia);
+                    return;
+                }
+                habitanteBD = DBHabitante.buscarHabitante(in_idPersona.getValue().getIdPersona());
+                if (habitanteBD == null) {
                     mostrarInfoOperacion("El habitante no existe", colorAdvertencia);
                     cambiarPane(pane_actualizar, pane_entrada);
                     return;
                 }
 
-                field_idPersonaActualizar.setText(in_idPersona.getText());
-                field_idViviendaActualizar.setText(Integer.toString(habitanteBD.getIdVivienda()));
+                field_idPersonaActualizar.setValue(in_idPersona.getValue());
+
+                ViviendaBD vivHabitante = DBVivienda.buscarVivienda(habitanteBD.getIdVivienda());
+                if (vivHabitante != null) {
+                    for (ViviendaBD v : field_idViviendaActualizar.getItems()) {
+                        if (v.getId_vivienda() == vivHabitante.getId_vivienda()) {
+                            field_idViviendaActualizar.setValue(v);
+                            break;
+                        }
+                    }
+                }
+
                 combo_rolActualizar.getSelectionModel().select(habitanteBD.getRol());
                 out_infoOperacion.setVisible(false);
 
-                btn_confirmacion.setText("Actualizar");
+                btn_confirmacionActualizar.setText("Actualizar");
                 cambiarPane(pane_entrada, pane_actualizar);
                 break;
 
             case BORRAR:
-                habitanteBD = DBHabitante.buscarHabitante(Integer.parseInt(in_idPersona.getText()));
-                if(habitanteBD == null){
+                if (in_idPersona.getValue() == null) {
+                    mostrarInfoOperacion("Debe seleccionar una persona", colorAdvertencia);
+                    return;
+                }
+                habitanteBD = DBHabitante.buscarHabitante(in_idPersona.getValue().getIdPersona());
+                if (habitanteBD == null) {
                     mostrarInfoOperacion("El habitante no existe", colorAdvertencia);
                     cambiarPane(pane_actualizar, pane_entrada);
                     return;
                 }
 
-                if(!existePersona(Integer.parseInt(in_idPersona.getText()))) return;
-                if(!existeVivienda(habitanteBD.getIdVivienda())) return;
+                personaBD = in_idPersona.getValue();
+                if (!existeVivienda(habitanteBD.getIdVivienda())) return;
                 calleBD = DBCalle.buscarCalleID(viviendaBD.getIdCalle());
 
                 out_infoOperacion.setVisible(false);
                 cargarPaneDatosHabitante();
 
-                btn_confirmacion.setText("Borrar habitante");
+                btn_confirmacionCrear.setText("Borrar habitante");
                 cambiarPane(pane_entrada, pane_confirmacion);
                 break;
         }
     }
 
-    @FXML void volverMenuPrincipal(ActionEvent event) throws IOException {
+    @FXML
+    void volverMenuPrincipal(ActionEvent event) throws IOException {
         /// CARGA LA VISTA DE LA INTERFAZ DE LOGIN
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Interfaces/MenuPrincipal.fxml"));
         Parent root = loader.load();
@@ -198,14 +244,16 @@ public class HabitanteController {
         fadeOut.play();
     }
 
-    @FXML void volverVentanaAnterior(ActionEvent event) {
+    @FXML
+    void volverVentanaAnterior(ActionEvent event) {
         cambiarPane(pane_actual, padrePane.get(pane_actual));
         out_infoOperacion.setVisible(false);
 
         if (pane_actual == pane_inicio) btn_volver.setVisible(false);
     }
 
-    @FXML void ejecutarOperacionConfirmacion(ActionEvent event) {
+    @FXML
+    void ejecutarOperacionConfirmacion(ActionEvent event) {
         switch (opSeleccionada) {
             case CREAR:
                 operacionCrear();
@@ -222,33 +270,56 @@ public class HabitanteController {
     }
 
     //JavaFX - Crear habitante
-    @FXML private TextField out_nombrePerRegistro;
-    @FXML private TextField out_rol;
-    @FXML private TextField out_rolRegistro;
-    @FXML private TextField out_nombreCalRegistro;
-    @FXML private TextField out_numExtRegistro;
-    @FXML private TextField out_numIntRegistro;
-    @FXML private TextField out_tipoVivRegistro;
+    @FXML
+    private TextField out_nombrePerRegistro;
+    @FXML
+    private TextField out_rol;
+    @FXML
+    private TextField out_rolRegistro;
+    @FXML
+    private TextField out_nombreCalRegistro;
+    @FXML
+    private TextField out_numExtRegistro;
+    @FXML
+    private TextField out_numIntRegistro;
+    @FXML
+    private TextField out_tipoVivRegistro;
 
     //JavaFX - Busqueda de habitantes
-    @FXML private AnchorPane pane_resultadoBusqueda;
-    @FXML private TableView<Map<String, Object>> tabla_busquedaHabitante;
-    @FXML private TableColumn<Map<String, Object>, Object> colIdPersona;
-    @FXML private TableColumn<Map<String, Object>, Object> colNombre;
-    @FXML private TableColumn<Map<String, Object>, Object> colRol;
-    @FXML private TableColumn<Map<String, Object>, Object> colIdVivienda;
-    @FXML private TableColumn<Map<String, Object>, Object> colTipoVivienda;
-    @FXML private TableColumn<Map<String, Object>, Object> colNoExt;
-    @FXML private TableColumn<Map<String, Object>, Object> colNoInt;
-    @FXML private TableColumn<Map<String, Object>, Object> colMetrosCuadrados;
-    @FXML private TableColumn<Map<String, Object>, Object> colIdCalle;
-    @FXML private TableColumn<Map<String, Object>, Object> colNombreCalle;
+    @FXML
+    private AnchorPane pane_resultadoBusqueda;
+    @FXML
+    private TableView<Map<String, Object>> tabla_busquedaHabitante;
+    @FXML
+    private TableColumn<Map<String, Object>, Object> colIdPersona;
+    @FXML
+    private TableColumn<Map<String, Object>, Object> colNombre;
+    @FXML
+    private TableColumn<Map<String, Object>, Object> colRol;
+    @FXML
+    private TableColumn<Map<String, Object>, Object> colIdVivienda;
+    @FXML
+    private TableColumn<Map<String, Object>, Object> colTipoVivienda;
+    @FXML
+    private TableColumn<Map<String, Object>, Object> colNoExt;
+    @FXML
+    private TableColumn<Map<String, Object>, Object> colNoInt;
+    @FXML
+    private TableColumn<Map<String, Object>, Object> colMetrosCuadrados;
+    @FXML
+    private TableColumn<Map<String, Object>, Object> colIdCalle;
+    @FXML
+    private TableColumn<Map<String, Object>, Object> colNombreCalle;
 
     //JavaFX - Actualizar habitante
-    @FXML private AnchorPane pane_actualizar;
-    @FXML private TextField field_idPersonaActualizar;
-    @FXML private TextField field_idViviendaActualizar;
-    @FXML private ComboBox<String> combo_rolActualizar;
+    @FXML
+    private AnchorPane pane_actualizar;
+    @FXML
+    private ComboBox<PersonaBD> field_idPersonaActualizar;
+    @FXML
+    private ComboBox<ViviendaBD> field_idViviendaActualizar;
+    @FXML
+    private ComboBox<String> combo_rolActualizar;
 
 
     //Componentes generales
@@ -276,28 +347,18 @@ public class HabitanteController {
         out_infoOperacion.setVisible(true);
     }
 
-    public boolean validarIdPersona(TextField in_idPersona) {
-        if (in_idPersona.getText().isBlank()) {
-            mostrarInfoOperacion("El campo de Id de persona es necesario", colorAdvertencia);
-            return false;
-        }
-
-        if (!in_idPersona.getText().matches("[0-9]+")) {
-            mostrarInfoOperacion("El campo de Id de persona debe ser un numero", colorAdvertencia);
+    public boolean validarIdPersona(ComboBox<PersonaBD> in_idPersona) {
+        if (in_idPersona.getValue() == null) {
+            mostrarInfoOperacion("El campo de persona es necesario", colorAdvertencia);
             return false;
         }
 
         return true;
     }
 
-    public boolean validarIdVivienda(TextField in_idVivienda) {
-        if (in_idVivienda.getText().isBlank()) {
-            mostrarInfoOperacion("El campo de Id de vivienda es necesario", colorAdvertencia);
-            return false;
-        }
-
-        if (!in_idVivienda.getText().matches("[0-9]+")) {
-            mostrarInfoOperacion("El campo de Id de vivienda debe ser un numero", colorAdvertencia);
+    public boolean validarIdVivienda(ComboBox<ViviendaBD> in_idVivienda) {
+        if (in_idVivienda.getValue() == null) {
+            mostrarInfoOperacion("El campo de vivienda es necesario", colorAdvertencia);
             return false;
         }
 
@@ -361,9 +422,13 @@ public class HabitanteController {
     public void operacionSeleccionada() {
         btn_entrada.setText(opSeleccionada.getTextoBoton());
 
-        in_idPersona.clear();
-        in_idVivienda.clear();
+        in_idPersona.getSelectionModel().clearSelection();
+        in_idVivienda.getSelectionModel().clearSelection();
         in_comboRol.getSelectionModel().clearSelection();
+
+        field_idPersonaActualizar.getSelectionModel().clearSelection();
+        field_idViviendaActualizar.getSelectionModel().clearSelection();
+        combo_rolActualizar.getSelectionModel().clearSelection();
 
         in_idVivienda.setVisible(opSeleccionada.ordinal() < 2);
         txt_viviendaEntrada.setVisible(opSeleccionada.ordinal() < 2);
@@ -397,11 +462,11 @@ public class HabitanteController {
     }
 
     public void operacionCrear() {
-        boolean resultado = DBHabitante.insertarHabitante(Integer.parseInt(in_idPersona.getText()), Integer.parseInt(in_idVivienda.getText()), in_comboRol.getValue());
+        boolean resultado = DBHabitante.insertarHabitante(in_idPersona.getValue().getIdPersona(), in_idVivienda.getValue().getId_vivienda(), in_comboRol.getValue());
 
-        if(resultado) {
-            in_idPersona.clear();
-            in_idVivienda.clear();
+        if (resultado) {
+            in_idPersona.getSelectionModel().clearSelection();
+            in_idVivienda.getSelectionModel().clearSelection();
             in_comboRol.getSelectionModel().clearSelection();
             mostrarInfoOperacion("Habitante creado correctamente", colorExito);
         } else {
@@ -413,29 +478,16 @@ public class HabitanteController {
 
     //Eventos - Busqueda de habitantes
     public void operacionBuscar() {
-        if (!in_idPersona.getText().isBlank() && !in_idPersona.getText().matches("[0-9]+")) {
-            mostrarInfoOperacion("El campo de Id de persona debe ser un numero", colorAdvertencia);
-            return;
-        }
-
-        if (!in_idVivienda.getText().isBlank() && !in_idVivienda.getText().matches("[0-9]+")) {
-            mostrarInfoOperacion("El campo de Id de vivienda debe ser un numero", colorAdvertencia);
-            return;
-        }
-
         ObservableList<Map<String, Object>> resultadoBusqueda = null;
         Integer idPersona = null;
         Integer idVivienda = null;
         String rol = in_comboRol.getValue();
 
-        if (validarIdPersona(in_idPersona)) {
-            idPersona = Integer.parseInt(in_idPersona.getText());
-            if (!existePersona(idPersona)) return;
+        if (in_idPersona.getValue() != null) {
+            idPersona = in_idPersona.getValue().getIdPersona();
         }
-        if (validarIdVivienda(in_idVivienda)) {
-            idVivienda = Integer.parseInt(in_idVivienda.getText());
-            if (!existeVivienda(idVivienda)) return;
-
+        if (in_idVivienda.getValue() != null) {
+            idVivienda = in_idVivienda.getValue().getId_vivienda();
         }
 
         resultadoBusqueda = DBHabitante.buscarHabitantes(idPersona, idVivienda, rol);
@@ -492,22 +544,23 @@ public class HabitanteController {
 
     //Eventos - Actualizar habitante
     public void operacionActualizar() {
-        int idPersona = Integer.parseInt(field_idPersonaActualizar.getText());
+        if (field_idPersonaActualizar.getValue() == null) {
+            mostrarInfoOperacion("Debe seleccionar una persona", colorAdvertencia);
+            return;
+        }
 
-        if(!validarIdVivienda(field_idViviendaActualizar)) return;
-        if(!validarRol(combo_rolActualizar)) return;
+        int idPersona = field_idPersonaActualizar.getValue().getIdPersona();
 
-        int nuevaVivienda = Integer.parseInt(field_idViviendaActualizar.getText());
+        if (!validarIdVivienda(field_idViviendaActualizar)) return;
+        if (!validarRol(combo_rolActualizar)) return;
+
+        int nuevaVivienda = field_idViviendaActualizar.getValue().getId_vivienda();
         String nuevoRol = combo_rolActualizar.getValue();
 
-        if(!validarIdVivienda(field_idViviendaActualizar) || !existeVivienda(nuevaVivienda)) return;
-        if(!validarRol(combo_rolActualizar)) return;
-
         boolean exito = DBHabitante.actualizarHabitante(idPersona, nuevaVivienda, nuevoRol);
-        if(exito){
+        if (exito) {
             mostrarInfoOperacion("Habitante actualizado correctamente", colorExito);
-        }
-        else{
+        } else {
             mostrarInfoOperacion("Error al actualizar el habitante. Intente de nuevo", colorAdvertencia);
         }
 
@@ -516,10 +569,9 @@ public class HabitanteController {
 
     public void operacionBorrar() {
         boolean exito = DBHabitante.borrarHabitante(habitanteBD.getIdPersona());
-        if(exito){
+        if (exito) {
             mostrarInfoOperacion("Habitante borrado correctamente", colorExito);
-        }
-        else{
+        } else {
             mostrarInfoOperacion("Error al borrar el habitante. Intente de nuevo", colorAdvertencia);
         }
 

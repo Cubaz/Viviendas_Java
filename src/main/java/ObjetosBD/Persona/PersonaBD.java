@@ -28,7 +28,7 @@ public class PersonaBD {
 
     @Override
     public String toString() {
-        return Nombre;
+        return "ID: " + IdPersona + " - " + Nombre;
     }
 
 }

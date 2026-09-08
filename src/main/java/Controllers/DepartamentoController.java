@@ -55,9 +55,9 @@ public class DepartamentoController {
     @FXML private AnchorPane pane_confirmacion;
 
     // Campos de entrada (pane_entrada)
-    @FXML private TextField in_idDepartamento;
-    @FXML private TextField in_idEdificio;
-    @FXML private TextField in_idVivienda;
+    @FXML private ComboBox<DepartamentoBD> in_idDepartamento;
+    @FXML private ComboBox<EdificioBD> in_idEdificio;
+    @FXML private ComboBox<ViviendaBD> in_idVivienda;
     @FXML private TextField in_piso;
     @FXML private Button btn_entrada;
     @FXML private Text txt_idDepartamentoEntrada;
@@ -66,9 +66,9 @@ public class DepartamentoController {
     @FXML private Text txt_pisoEntrada;
 
     // Campos de actualizar (pane_actualizar)
-    @FXML private TextField field_idDepartamentoActualizar;
-    @FXML private TextField field_idEdificioActualizar;
-    @FXML private TextField field_idViviendaActualizar;
+    @FXML private ComboBox<DepartamentoBD> field_idDepartamentoActualizar;
+    @FXML private ComboBox<EdificioBD> field_idEdificioActualizar;
+    @FXML private ComboBox<ViviendaBD> field_idViviendaActualizar;
     @FXML private TextField field_pisoActualizar;
     @FXML private Button btn_confirmacionActualizar;
 
@@ -108,6 +108,16 @@ public class DepartamentoController {
     @FXML
     public void initialize() {
         pane_actual = pane_inicio;
+
+        in_idDepartamento.setItems(DBDepartamento.obtenerDepartamento());
+        field_idDepartamentoActualizar.setItems(DBDepartamento.obtenerDepartamento());
+
+        in_idEdificio.setItems(DBEdificio.obtenerEdificio());
+        field_idEdificioActualizar.setItems(DBEdificio.obtenerEdificio());
+
+        in_idVivienda.setItems(DBVivienda.obtenerVivienda());
+        field_idViviendaActualizar.setItems(DBVivienda.obtenerVivienda());
+
         initPadrePane();
         configurarTablaBusqueda();
     }
@@ -162,7 +172,6 @@ public class DepartamentoController {
 
         if (esCrear) {
             in_idDepartamento.setDisable(true);
-            in_idDepartamento.setText("Auto");
         } else {
             in_idDepartamento.setDisable(false);
         }
@@ -182,9 +191,9 @@ public class DepartamentoController {
     }
 
     private void limpiarCamposEntrada() {
-        in_idDepartamento.clear();
-        in_idEdificio.clear();
-        in_idVivienda.clear();
+        in_idDepartamento.getSelectionModel().clearSelection();
+        in_idEdificio.getSelectionModel().clearSelection();
+        in_idVivienda.getSelectionModel().clearSelection();
         in_piso.clear();
     }
 
@@ -203,12 +212,25 @@ public class DepartamentoController {
                 operacionBuscar();
                 break;
             case ACTUALIZAR:
-                if (validarId(in_idDepartamento, "departamento")) {
-                    departamentoBD = DBDepartamento.buscarDepartamento(Integer.parseInt(in_idDepartamento.getText()));
+                if (validarIdDepartamento(in_idDepartamento)) {
+                    departamentoBD = in_idDepartamento.getValue();
                     if (departamentoBD != null) {
-                        field_idDepartamentoActualizar.setText(String.valueOf(departamentoBD.getId_departamento()));
-                        field_idEdificioActualizar.setText(String.valueOf(departamentoBD.getId_edificio()));
-                        field_idViviendaActualizar.setText(String.valueOf(departamentoBD.getId_vivienda()));
+                        field_idDepartamentoActualizar.setValue(departamentoBD);
+
+                        for (EdificioBD e : field_idEdificioActualizar.getItems()) {
+                            if (e.getIdEdificio() == departamentoBD.getId_edificio()) {
+                                field_idEdificioActualizar.setValue(e);
+                                break;
+                            }
+                        }
+
+                        for (ViviendaBD v : field_idViviendaActualizar.getItems()) {
+                            if (v.getId_vivienda() == departamentoBD.getId_vivienda()) {
+                                field_idViviendaActualizar.setValue(v);
+                                break;
+                            }
+                        }
+
                         field_pisoActualizar.setText(String.valueOf(departamentoBD.getPiso()));
                         cambiarPane(pane_entrada, pane_actualizar);
                     } else {
@@ -217,8 +239,8 @@ public class DepartamentoController {
                 }
                 break;
             case BORRAR:
-                if (validarId(in_idDepartamento, "departamento")) {
-                    departamentoBD = DBDepartamento.buscarDepartamento(Integer.parseInt(in_idDepartamento.getText()));
+                if (validarIdDepartamento(in_idDepartamento)) {
+                    departamentoBD = in_idDepartamento.getValue();
                     if (departamentoBD != null) {
                         edificioBD = DBEdificio.buscarEdificioID(departamentoBD.getId_edificio());
                         viviendaBD = DBVivienda.buscarVivienda(departamentoBD.getId_vivienda());
@@ -237,29 +259,35 @@ public class DepartamentoController {
         if (opSeleccionada == operacionDepartamento.CREAR) {
             out_idDepartamentoRegistro.setText("Auto");
         } else {
-            out_idDepartamentoRegistro.setText(departamentoBD != null ? String.valueOf(departamentoBD.getId_departamento()) : in_idDepartamento.getText());
+            out_idDepartamentoRegistro.setText(departamentoBD != null ? String.valueOf(departamentoBD.getId_departamento()) : (in_idDepartamento.getValue() != null ? String.valueOf(in_idDepartamento.getValue().getId_departamento()) : "N/A"));
         }
         out_edificioRegistro.setText(edificioBD != null ? edificioBD.getNombre() : "N/A");
         out_pisoRegistro.setText(departamentoBD != null ? String.valueOf(departamentoBD.getPiso()) : in_piso.getText());
-        out_idViviendaRegistro.setText(viviendaBD != null ? String.valueOf(viviendaBD.getId_vivienda()) : in_idVivienda.getText());
+        out_idViviendaRegistro.setText(viviendaBD != null ? String.valueOf(viviendaBD.getId_vivienda()) : (in_idVivienda.getValue() != null ? String.valueOf(in_idVivienda.getValue().getId_vivienda()) : "N/A"));
         out_tipoVivRegistro.setText(viviendaBD != null ? viviendaBD.getTipo() : "N/A");
     }
 
     private boolean validarCamposCrear() {
-        if (!validarId(in_idEdificio, "edificio")) return false;
-        if (!validarId(in_idVivienda, "vivienda")) return false;
+        if (in_idEdificio.getValue() == null) {
+            mostrarInfoOperacion("Debe seleccionar un edificio", colorAdvertencia);
+            return false;
+        }
+        if (in_idVivienda.getValue() == null) {
+            mostrarInfoOperacion("Debe seleccionar una vivienda", colorAdvertencia);
+            return false;
+        }
         if (in_piso.getText().isBlank()) {
             mostrarInfoOperacion("El campo piso es necesario", colorAdvertencia);
             return false;
         }
 
-        edificioBD = DBEdificio.buscarEdificioID(Integer.parseInt(in_idEdificio.getText()));
+        edificioBD = in_idEdificio.getValue();
         if (edificioBD == null) {
             mostrarInfoOperacion("El edificio no existe", colorAdvertencia);
             return false;
         }
 
-        viviendaBD = DBVivienda.buscarVivienda(Integer.parseInt(in_idVivienda.getText()));
+        viviendaBD = in_idVivienda.getValue();
         if (viviendaBD == null) {
             mostrarInfoOperacion("La vivienda no existe", colorAdvertencia);
             return false;
@@ -268,25 +296,19 @@ public class DepartamentoController {
         return true;
     }
 
-    private boolean validarId(TextField field, String entidad) {
-        if (field.getText().isBlank()) {
-            mostrarInfoOperacion("El Id de " + entidad + " es necesario", colorAdvertencia);
-            return false;
-        }
-        if (!field.getText().matches("[0-9]+")) {
-            mostrarInfoOperacion("El Id de " + entidad + " debe ser un número", colorAdvertencia);
+    private boolean validarIdDepartamento(ComboBox<DepartamentoBD> field) {
+        if (field.getValue() == null) {
+            mostrarInfoOperacion("Debe seleccionar un departamento", colorAdvertencia);
+            field.requestFocus();
             return false;
         }
         return true;
     }
 
     private void operacionBuscar() {
-        Integer idDep = null;
-        if (!in_idDepartamento.getText().isBlank() && !in_idDepartamento.getText().equals("Auto")) {
-            if (in_idDepartamento.getText().matches("[0-9]+")) idDep = Integer.parseInt(in_idDepartamento.getText());
-        }
-        Integer idEdi = in_idEdificio.getText().isBlank() ? null : Integer.parseInt(in_idEdificio.getText());
-        Integer idViv = in_idVivienda.getText().isBlank() ? null : Integer.parseInt(in_idVivienda.getText());
+        Integer idDep = in_idDepartamento.getValue() == null ? null : in_idDepartamento.getValue().getId_departamento();
+        Integer idEdi = in_idEdificio.getValue() == null ? null : in_idEdificio.getValue().getIdEdificio();
+        Integer idViv = in_idVivienda.getValue() == null ? null : in_idVivienda.getValue().getId_vivienda();
         Integer piso = in_piso.getText().isBlank() ? null : Integer.parseInt(in_piso.getText());
 
         ObservableList<Map<String, Object>> resultados = DBDepartamento.buscarDepartamentos(idDep, idEdi, idViv, piso);
@@ -304,8 +326,8 @@ public class DepartamentoController {
         switch (opSeleccionada) {
             case CREAR:
                 int idGenerado = DBDepartamento.insertarDepartamento(
-                        Integer.parseInt(in_idEdificio.getText()),
-                        Integer.parseInt(in_idVivienda.getText()),
+                        in_idEdificio.getValue().getIdEdificio(),
+                        in_idVivienda.getValue().getId_vivienda(),
                         Integer.parseInt(in_piso.getText())
                 );
                 if (idGenerado != -1) {
@@ -317,10 +339,22 @@ public class DepartamentoController {
                 cambiarPane(pane_confirmacion, pane_entrada);
                 break;
             case ACTUALIZAR:
+                if (field_idDepartamentoActualizar.getValue() == null) {
+                    mostrarInfoOperacion("Debe seleccionar un departamento", colorAdvertencia);
+                    return;
+                }
+                if (field_idEdificioActualizar.getValue() == null) {
+                    mostrarInfoOperacion("Debe seleccionar un edificio", colorAdvertencia);
+                    return;
+                }
+                if (field_idViviendaActualizar.getValue() == null) {
+                    mostrarInfoOperacion("Debe seleccionar una vivienda", colorAdvertencia);
+                    return;
+                }
                 boolean ok = DBDepartamento.actualizarDepartamento(
-                        Integer.parseInt(field_idDepartamentoActualizar.getText()),
-                        Integer.parseInt(field_idEdificioActualizar.getText()),
-                        Integer.parseInt(field_idViviendaActualizar.getText()),
+                        field_idDepartamentoActualizar.getValue().getId_departamento(),
+                        field_idEdificioActualizar.getValue().getIdEdificio(),
+                        field_idViviendaActualizar.getValue().getId_vivienda(),
                         Integer.parseInt(field_pisoActualizar.getText())
                 );
                 if (ok) {

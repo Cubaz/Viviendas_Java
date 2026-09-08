@@ -117,6 +117,26 @@ public class JDVivienda {
         }
     }
 
+    public ObservableList<ViviendaBD> obtenerVivienda(){
+        ObservableList<ViviendaBD> lista = FXCollections.observableArrayList();
+        String SQL = "SELECT * FROM vivienda";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL)){
+            try(ResultSet RS = PS.executeQuery()){
+                while(RS.next()){
+                    int id = RS.getInt("id_vivienda");
+                    String tipo = RS.getString("viv_tipo");
+                    int habitantes = RS.getInt("viv_habitantes");
+                    int numExterior = RS.getInt("viv_numExt");
+                    int numInterior = RS.getInt("viv_numInt");
+                    int idCalle = RS.getInt("id_calle");
+                    float metroscuadrados = RS.getFloat("viv_mtscuadrados");
 
-
+                    lista.add(new ViviendaBD(id, tipo, habitantes, numExterior, numInterior, idCalle, metroscuadrados));
+                }
+            }
+        }catch (SQLException e){
+            System.out.println("ERROR AL OBTENER VIVIENDAS: " + e.getMessage());
+        }
+        return lista;
+    }
 }

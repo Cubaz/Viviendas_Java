@@ -170,4 +170,22 @@ public class JDDepartamento {
 
         return sentencia.toString();
     }
+
+    public ObservableList<DepartamentoBD> obtenerDepartamento(){
+        ObservableList<DepartamentoBD> departamentos = FXCollections.observableArrayList();
+        String SQL = "SELECT * FROM departamento";
+        try(PreparedStatement PS = CN.getConexion().prepareStatement(SQL);
+            ResultSet RS = PS.executeQuery()){
+            while(RS.next()){
+                int idDepartamento = RS.getInt("id_departamento");
+                int idEdificio = RS.getInt("id_edificio");
+                int idVivienda = RS.getInt("id_vivienda");
+                int piso = RS.getInt("dep_piso");
+                departamentos.add(new DepartamentoBD(idDepartamento, idEdificio, idVivienda, piso));
+            }
+        }catch (SQLException e){
+            System.out.println("ERROR AL OBTENER DEPARTAMENTOS: " + e.getMessage());
+        }
+        return departamentos;
+    }
 }

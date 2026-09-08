@@ -51,14 +51,14 @@ public class EdificioController {
     @FXML private AnchorPane pane_confirmacion;
 
     // Campos de entrada (pane_entrada)
-    @FXML private TextField in_idEdificio;
+    @FXML private ComboBox<EdificioBD> in_idEdificio;
     @FXML private TextField in_nombreEdificio;
     @FXML private Button btn_entrada;
     @FXML private Text txt_idEdificioEntrada;
     @FXML private Text txt_nombreEdificioEntrada;
 
     // Campos de actualizar (pane_actualizar)
-    @FXML private TextField field_idEdificioActualizar;
+    @FXML private ComboBox<EdificioBD> field_idEdificioActualizar;
     @FXML private TextField field_nombreEdificioActualizar;
     @FXML private Button btn_confirmacionActualizar;
 
@@ -86,6 +86,10 @@ public class EdificioController {
     @FXML
     public void initialize() {
         pane_actual = pane_inicio;
+
+        in_idEdificio.setItems(DBEdificio.obtenerEdificio());
+        field_idEdificioActualizar.setItems(DBEdificio.obtenerEdificio());
+
         initPadrePane();
         configurarTablaBusqueda();
     }
@@ -129,7 +133,7 @@ public class EdificioController {
 
     private void prepararEntrada() {
         btn_entrada.setText(opSeleccionada.getTextoBoton());
-        in_idEdificio.clear();
+        in_idEdificio.getSelectionModel().clearSelection();
         in_nombreEdificio.clear();
         out_infoOperacion.setVisible(false);
 
@@ -138,7 +142,6 @@ public class EdificioController {
         boolean esBuscar = opSeleccionada == operacionEdificio.BUSCAR;
 
         in_idEdificio.setDisable(esCrear);
-        if (esCrear) in_idEdificio.setText("Auto");
         
         in_nombreEdificio.setVisible(esCrear || esBuscar);
         txt_nombreEdificioEntrada.setVisible(esCrear || esBuscar);
@@ -163,9 +166,9 @@ public class EdificioController {
                 break;
             case ACTUALIZAR:
                 if (validarId(in_idEdificio)) {
-                    edificioBD = DBEdificio.buscarEdificioID(Integer.parseInt(in_idEdificio.getText()));
+                    edificioBD = in_idEdificio.getValue();
                     if (edificioBD != null) {
-                        field_idEdificioActualizar.setText(String.valueOf(edificioBD.getIdEdificio()));
+                        field_idEdificioActualizar.setValue(edificioBD);
                         field_nombreEdificioActualizar.setText(edificioBD.getNombre());
                         cambiarPane(pane_entrada, pane_actualizar);
                     } else {
@@ -175,7 +178,7 @@ public class EdificioController {
                 break;
             case BORRAR:
                 if (validarId(in_idEdificio)) {
-                    edificioBD = DBEdificio.buscarEdificioID(Integer.parseInt(in_idEdificio.getText()));
+                    edificioBD = in_idEdificio.getValue();
                     if (edificioBD != null) {
                         out_idEdificioRegistro.setText(String.valueOf(edificioBD.getIdEdificio()));
                         out_nombreEdificioRegistro.setText(edificioBD.getNombre());
@@ -190,7 +193,7 @@ public class EdificioController {
     }
 
     private void operacionBuscar() {
-        Integer id = (!in_idEdificio.getText().isBlank() && in_idEdificio.getText().matches("[0-9]+")) ? Integer.parseInt(in_idEdificio.getText()) : null;
+        Integer id = (in_idEdificio.getValue() != null) ? in_idEdificio.getValue().getIdEdificio() : null;
         String nombre = in_nombreEdificio.getText().isBlank() ? null : in_nombreEdificio.getText();
 
         ObservableList<Map<String, Object>> resultados = DBEdificio.buscarEdificios(id, nombre);
@@ -231,7 +234,7 @@ public class EdificioController {
             return;
         }
 
-        if (DBEdificio.actualizarEdificio(Integer.parseInt(field_idEdificioActualizar.getText()), field_nombreEdificioActualizar.getText())) {
+        if (DBEdificio.actualizarEdificio(field_idEdificioActualizar.getValue().getIdEdificio(), field_nombreEdificioActualizar.getText())) {
             mostrarInfoOperacion("Edificio actualizado correctamente", colorExito);
             cambiarPane(pane_actualizar, pane_entrada);
         } else {
@@ -292,9 +295,9 @@ public class EdificioController {
         return true;
     }
 
-    private boolean validarId(TextField field) {
-        if (field.getText().isBlank() || !field.getText().matches("[0-9]+")) {
-            mostrarInfoOperacion("ID inválido", colorAdvertencia);
+    private boolean validarId(ComboBox<EdificioBD> field) {
+        if (field.getValue() == null) {
+            mostrarInfoOperacion("Debe seleccionar un edificio", colorAdvertencia);
             field.requestFocus();
             return false;
         }

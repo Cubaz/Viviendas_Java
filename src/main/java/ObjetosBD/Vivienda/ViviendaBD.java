@@ -40,4 +40,8 @@ public class ViviendaBD {
     public float getMts_cuadrados(){return mts_cuadrados;}
     public void setMts_cuadrados(float mts_cuadrados){this.mts_cuadrados = mts_cuadrados;}
 
+    @Override
+    public String toString() {
+        return "ID: " + id_vivienda + " - " + tipo + " (Ext: " + num_ext + ")";
+    }
 }

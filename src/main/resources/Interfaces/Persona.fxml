@@ -82,11 +82,7 @@
                   <Font name="CocogooseProTrial Darkmode" size="20.0" />
                </font>
             </Text>
-            <TextField fx:id="in_idPersona" layoutX="450.0" prefHeight="40.0" prefWidth="106.0">
-               <font>
-                  <Font name="CocogooseProTrial Light" size="19.0" />
-               </font>
-            </TextField>
+            <ComboBox fx:id="in_idPersona" layoutX="450.0" prefHeight="40.0" prefWidth="250.0" />
             <Text fx:id="txt_nombreEntrada" fill="#f9f0e0" layoutX="230.0" layoutY="84.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nombre:">
                <font>
                   <Font name="CocogooseProTrial Darkmode" size="20.0" />
@@ -127,11 +123,7 @@
                   <Font name="CocogooseProTrial Darkmode" size="20.0" />
                </font>
             </Text>
-            <TextField fx:id="field_idPersonaActualizar" disable="true" layoutX="450.0" prefHeight="40.0" prefWidth="106.0">
-               <font>
-                  <Font name="CocogooseProTrial Light" size="19.0" />
-               </font>
-            </TextField>
+            <ComboBox fx:id="field_idPersonaActualizar" disable="true" layoutX="450.0" prefHeight="40.0" prefWidth="250.0" />
             <Text fill="#f9f0e0" layoutX="230.0" layoutY="84.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nombre:">
                <font>
                   <Font name="CocogooseProTrial Darkmode" size="20.0" />

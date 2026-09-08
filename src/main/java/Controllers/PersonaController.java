@@ -53,7 +53,7 @@ public class PersonaController {
     @FXML private AnchorPane pane_confirmacion;
 
     //Campos de entrada (pane_entrada)
-    @FXML private TextField in_idPersona;
+    @FXML private ComboBox<PersonaBD> in_idPersona;
     @FXML private TextField in_nombre;
     @FXML private TextField in_edad;
     @FXML private ComboBox<FamiliaBD> in_comboFamilia;
@@ -63,7 +63,7 @@ public class PersonaController {
     @FXML private Text txt_familiaEntrada;
 
     //Campos de actualizar (pane_actualizar)
-    @FXML private TextField field_idPersonaActualizar;
+    @FXML private ComboBox<PersonaBD> field_idPersonaActualizar;
     @FXML private TextField field_nombreActualizar;
     @FXML private TextField field_edadActualizar;
     @FXML private ComboBox<FamiliaBD> combo_familiaActualizar;
@@ -97,6 +97,9 @@ public class PersonaController {
     @FXML
     public void initialize() {
         pane_actual = pane_inicio;
+
+        in_idPersona.setItems(DBPersona.obtenerPersona());
+        field_idPersonaActualizar.setItems(DBPersona.obtenerPersona());
 
         in_comboFamilia.setItems(DBFamilia.obtenerFamilias());
         combo_familiaActualizar.setItems(DBFamilia.obtenerFamilias());
@@ -145,7 +148,7 @@ public class PersonaController {
 
     private void operacionSeleccionada() {
         btn_entrada.setText(opSeleccionada.getTextoBoton());
-        in_idPersona.clear();
+        in_idPersona.getSelectionModel().clearSelection();
         in_nombre.clear();
         in_edad.clear();
         in_comboFamilia.getSelectionModel().clearSelection();
@@ -163,7 +166,6 @@ public class PersonaController {
         // Si es CREAR, el ID no se debe pedir (es auto-incremental)
         if(opSeleccionada == operacionPersona.CREAR) {
             in_idPersona.setDisable(true);
-            in_idPersona.setText("Auto");
         } else {
             in_idPersona.setDisable(false);
         }
@@ -190,12 +192,12 @@ public class PersonaController {
 
             case ACTUALIZAR:
                 if(!validarIdPersona(in_idPersona)) return;
-                personaBD = DBPersona.buscarPersonaID(Integer.parseInt(in_idPersona.getText()));
+                personaBD = in_idPersona.getValue();
                 if(personaBD == null){
                     mostrarInfoOperacion("La persona no existe", colorAdvertencia);
                     return;
                 }
-                field_idPersonaActualizar.setText(String.valueOf(personaBD.getIdPersona()));
+                field_idPersonaActualizar.setValue(personaBD);
                 field_nombreActualizar.setText(personaBD.getNombre());
                 field_edadActualizar.setText(String.valueOf(personaBD.getEdadPersona()));
                 // Buscar familia en el combo
@@ -212,7 +214,7 @@ public class PersonaController {
 
             case BORRAR:
                 if(!validarIdPersona(in_idPersona)) return;
-                personaBD = DBPersona.buscarPersonaID(Integer.parseInt(in_idPersona.getText()));
+                personaBD = in_idPersona.getValue();
                 if(personaBD == null){
                     mostrarInfoOperacion("La persona no existe", colorAdvertencia);
                     return;
@@ -259,7 +261,7 @@ public class PersonaController {
         if(!validarFamilia(combo_familiaActualizar)) return;
 
         boolean exito = DBPersona.actualizarPersona(
-                Integer.parseInt(field_idPersonaActualizar.getText()),
+                field_idPersonaActualizar.getValue().getIdPersona(),
                 field_nombreActualizar.getText(),
                 combo_familiaActualizar.getValue().getId(),
                 Integer.parseInt(field_edadActualizar.getText())
@@ -285,8 +287,8 @@ public class PersonaController {
 
     private void operacionBuscar() {
         Integer id = null;
-        if(!in_idPersona.getText().isEmpty() && !in_idPersona.getText().equals("Auto")){
-            if(in_idPersona.getText().matches("[0-9]+")) id = Integer.parseInt(in_idPersona.getText());
+        if(in_idPersona.getValue() != null){
+            id = in_idPersona.getValue().getIdPersona();
         }
         String nombre = in_nombre.getText();
         Integer edad = null;
@@ -324,9 +326,9 @@ public class PersonaController {
         return true;
     }
 
-    private boolean validarIdPersona(TextField field) {
-        if(field.getText().isBlank() || !field.getText().matches("[0-9]+")){
-            mostrarInfoOperacion("ID de persona inválido", colorAdvertencia);
+    private boolean validarIdPersona(ComboBox<PersonaBD> field) {
+        if(field.getValue() == null){
+            mostrarInfoOperacion("Debe seleccionar una persona", colorAdvertencia);
             field.requestFocus();
             return false;
         }
