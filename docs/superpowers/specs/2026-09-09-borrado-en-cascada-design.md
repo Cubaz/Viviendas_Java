@@ -2,34 +2,35 @@
 
 ## Objetivo
 
-Evitar que un registro padre se elimine mientras conserve relaciones hijas en
-la base `viviendas`. La aplicación debe informar al usuario sin borrar datos.
+Impedir siempre la eliminación de los registros superiores de la base
+`viviendas`, tengan o no relaciones hijas. La aplicación debe informar el
+motivo sin borrar datos.
 
 ## Reglas aprobadas
 
 | Registro eliminado | Comportamiento |
 | --- | --- |
-| Colonia | Se bloquea si tiene calles. |
-| Calle | Se bloquea si tiene viviendas. |
-| Vivienda | Se bloquea si tiene departamento, propietarios o habitantes. |
-| Edificio | Se bloquea si tiene departamentos. |
-| Familia | Se bloquea si tiene personas. |
-| Persona | Se bloquea si es propietario o habitante. |
+| Colonia | Siempre se bloquea. |
+| Calle | Siempre se bloquea. |
+| Vivienda | Siempre se bloquea. |
+| Edificio | Siempre se bloquea. |
+| Familia | Siempre se bloquea. |
+| Persona | Siempre se bloquea. |
 | Departamento, propietario y habitante | Se pueden eliminar individualmente; son relaciones hijas. |
 
 ## Diseño
 
-Las claves foráneas conservarán el comportamiento restrictivo de MySQL. No se
-añadirán cascadas ni triggers destructivos. La capa de interfaz traducirá el
-error de relación foránea a: “No se puede eliminar porque tiene datos
-relacionados. Elimine primero las relaciones hijas.”
+Una migración de MySQL instalará un disparador `BEFORE DELETE` para cada tabla
+superior. El disparador devolverá el error controlado `45000`, incluso si la
+fila no tiene hijos. Las claves foráneas existentes seguirán protegiendo la
+integridad ante operaciones externas.
 
-La eliminación de una vivienda no retirará propietario, departamento ni
-habitantes de forma automática. Para eliminar una vivienda, el usuario debe
-eliminar antes esas relaciones menores.
+La capa de interfaz traducirá tanto el error de relación foránea como el error
+del disparador a un mensaje claro. La eliminación de propietario, departamento
+y habitante no cambia: son relaciones menores que pueden retirarse por separado.
 
 ## Verificación
 
-Las pruebas crearán una base temporal con el mismo esquema y comprobarán que
-cada padre se mantiene al intentar borrarlo con hijos. También comprobarán que
-al eliminar primero los hijos, el padre queda disponible para eliminarse.
+Las pruebas crearán una base temporal con el mismo esquema, aplicarán la
+migración y comprobarán que cada padre se mantiene al intentar borrarlo con o
+sin hijos. También comprobarán que las relaciones hijas continúan eliminándose.
