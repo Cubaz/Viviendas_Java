@@ -110,18 +110,10 @@ public class ViviendaService {
         Validaciones.id(id, "Vivienda");
         return transaccion(connection -> {
             if (!bloquear(connection, id)) return false;
-            try (var ps = connection.prepareStatement("SELECT id_persona FROM habitantes WHERE id_vivienda=? LIMIT 1")) {
+            try (var ps = connection.prepareStatement("DELETE FROM vivienda WHERE id_vivienda=?")) {
                 ps.setInt(1, id);
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) throw new IllegalArgumentException("La vivienda tiene habitantes asociados. Retire esas relaciones antes de eliminarla.");
-                }
+                return ps.executeUpdate() > 0;
             }
-            for (String tabla : new String[]{"propietario", "departamento", "vivienda"}) {
-                try (var ps = connection.prepareStatement("DELETE FROM " + tabla + " WHERE id_vivienda=?")) {
-                    ps.setInt(1, id); ps.executeUpdate();
-                }
-            }
-            return true;
         });
     }
 

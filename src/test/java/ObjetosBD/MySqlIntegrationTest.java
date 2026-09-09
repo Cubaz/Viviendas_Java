@@ -101,14 +101,18 @@ class MySqlIntegrationTest {
         assertTrue(calles.eliminarCalle(exact));assertTrue(familias.eliminarFamilia(exact));assertTrue(colonias.eliminarColonia(exact));
     }
 
-    @Test void viviendaSeConvierteDeTipoYBorraSusRelaciones() throws Exception {
+    @Test void viviendaSeConvierteDeTipoYNoSeEliminaMientrasTieneRelaciones() throws Exception {
         int id=vivienda("Unifamiliar");
         assertTrue(service.actualizar(id,"Departamento",2,10,4,calle,64.75f,persona,edificio,3));
         assertEquals(3,new JDDepartamento().buscarDepartamentoVivienda(id).getPiso());
         assertTrue(service.actualizar(id,"Unifamiliar",2,10,0,calle,64.75f,persona,null,null));
         assertNull(new JDDepartamento().buscarDepartamentoVivienda(id));
         assertEquals(64.75f,new JDVivienda().buscarVivienda(id).getMts_cuadrados());
-        assertTrue(service.eliminar(id));assertEquals(0,count("propietario"));assertEquals(0,count("vivienda"));
+        assertThrows(DataAccessException.class, () -> service.eliminar(id));
+        assertEquals(1,count("propietario"));
+        assertEquals(1,count("vivienda"));
+        assertTrue(new JDPropietario().eliminarPropietario(id, persona));
+        assertTrue(service.eliminar(id));
         assertFalse(service.eliminar(id));
     }
 
@@ -128,7 +132,7 @@ class MySqlIntegrationTest {
         var rows=dao.buscarHabitantes(persona,null,null);
         assertEquals(2,rows.size());assertEquals(42.25f,((Number)rows.get(0).get("MetrosCuadrados")).floatValue());
         assertThrows(IllegalArgumentException.class,()->dao.borrarHabitante(persona));
-        assertThrows(IllegalArgumentException.class,()->service.eliminar(primera));
+        assertThrows(DataAccessException.class,()->service.eliminar(primera));
         assertTrue(dao.actualizarHabitante(persona,primera,primera,"Padre"));
         assertEquals("Otro",dao.buscarHabitante(persona,segunda).getRol());
         assertTrue(dao.borrarHabitante(persona,primera));assertFalse(dao.borrarHabitante(persona,primera));
@@ -162,6 +166,31 @@ class MySqlIntegrationTest {
         assertThrows(DataAccessException.class,()->new JDFamilia().eliminarFamilia(familia));
         assertFalse(personas.actualizarPersona(Integer.MAX_VALUE,"Ausente",familia,10));
         assertFalse(new JDHabitante().actualizarHabitante(persona,Integer.MAX_VALUE,Integer.MAX_VALUE,"Otro"));
+    }
+
+    @Test void padresNoSeEliminanHastaQueSeEliminanSusHijos() {
+        var colonias = new JDColonia();
+        var calles = new JDCalle();
+        var familias = new JDFamilia();
+        var edificios = new JDEdificio();
+        var personas = new JDPersona();
+        int vivienda = vivienda("Departamento");
+
+        assertThrows(DataAccessException.class, () -> colonias.eliminarColonia(colonia));
+        assertThrows(DataAccessException.class, () -> calles.eliminarCalle(calle));
+        assertThrows(DataAccessException.class, () -> familias.eliminarFamilia(familia));
+        assertThrows(DataAccessException.class, () -> edificios.eliminarEdificio(edificio));
+        assertThrows(DataAccessException.class, () -> personas.eliminarPersona(persona));
+
+        var departamento = new JDDepartamento().buscarDepartamentoVivienda(vivienda);
+        assertTrue(new JDPropietario().eliminarPropietario(vivienda, persona));
+        assertTrue(new JDDepartamento().eliminarDepartamento(departamento.getId_departamento()));
+        assertTrue(service.eliminar(vivienda));
+        assertTrue(personas.eliminarPersona(persona));
+        assertTrue(calles.eliminarCalle(calle));
+        assertTrue(edificios.eliminarEdificio(edificio));
+        assertTrue(familias.eliminarFamilia(familia));
+        assertTrue(colonias.eliminarColonia(colonia));
     }
 
     @Test void copropietariosNoSeSobrescriben() throws Exception {

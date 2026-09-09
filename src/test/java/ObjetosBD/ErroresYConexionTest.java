@@ -11,6 +11,10 @@ class ErroresYConexionTest {
   assertTrue(new DataAccessException("Guardar",new SQLException("sql", "23000",1452)).getMessage().contains("ya no existe"));
   assertTrue(new DataAccessException("Consultar",new SQLException("sql", "08001",0)).getMessage().contains("MySQL"));
  }
+ @Test void relacionHijaMuestraComoResolverElBorrado() {
+  assertEquals("Eliminar: No se puede eliminar porque tiene datos relacionados. Elimine primero las relaciones hijas.",
+   ErroresUI.mensaje(new DataAccessException("Eliminar",new SQLException("sql", "23000",1451))));
+ }
  @Test void conexionFallidaNoCierraLaAplicacion() throws Exception {
   String anterior=System.getProperty("viviendas.db.url");
   System.setProperty("viviendas.db.url","jdbc:driver-inexistente:test");
