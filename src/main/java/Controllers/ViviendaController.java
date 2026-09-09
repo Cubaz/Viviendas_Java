@@ -78,7 +78,8 @@ public class ViviendaController {
     private void validar(){
 
         String tipo;
-        int num_hab, numext, numint, mtscuadrados, num_piso = 0;
+        int num_hab, numext, numint, num_piso = 0;
+        float mtscuadrados;
 
 
         if(vivienda.getValue() == null){
@@ -143,7 +144,7 @@ public class ViviendaController {
         num_hab = Integer.parseInt(habitantes.getText());
         numext = Integer.parseInt(num_ext.getText());
         numint = Integer.parseInt(num_int.getText());
-        mtscuadrados = Integer.parseInt(mts_cuadrados.getText());
+        mtscuadrados = Float.parseFloat(mts_cuadrados.getText());
 
 
         int id = VDB.insertarVivienda(tipo, num_hab, numext, numint, idCalle, mtscuadrados);
@@ -175,6 +176,7 @@ public class ViviendaController {
 
     @FXML
     void buscar_vivienda(ActionEvent event) {
+        limpiar();
         if (criterio.getValue() == null || parametro.getText().isBlank()) {
             mensajeOperacion = "Debe seleccionar un criterio y escribir un parámetro";
             out_infoOperacion.setFill(colorAdvertencia);
@@ -184,12 +186,115 @@ public class ViviendaController {
 
         ObservableList<ViviendaBD> resultado = FXCollections.observableArrayList();
 
-        if (criterio.getValue().equals("ID")) {
+        if (criterio.getValue().equals("ID de la Vivienda")) {
             try {
                 int id = Integer.parseInt(parametro.getText());
                 resultado = VDB.buscarViviendaTabla(id);
             } catch (NumberFormatException e) {
                 mensajeOperacion = "El ID debe ser numérico";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+        } else if (criterio.getValue().equals("ID de Calle")) {
+            try{
+                int calle = Integer.parseInt(parametro.getText());
+                resultado = VDB.buscarViviendaCalleID(calle);
+            } catch (Exception e) {
+                mensajeOperacion = "El ID debe ser numérico";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+
+        }else if(criterio.getValue().equals("Nombre de la Calle")){
+            try{
+                String calle = parametro.getText();
+                resultado = VDB.buscarViviendaPorNombreCalle(calle);
+            } catch (Exception e) {
+                mensajeOperacion = "El ID debe ser numérico";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+
+        }else if(criterio.getValue().equals("Nombre del Propietario")){
+            try{
+                String propietario = parametro.getText();
+                resultado = VDB.buscarViviendaPorPropietario(propietario);
+            } catch (Exception e) {
+                mensajeOperacion = "El ID debe ser numérico";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+        } else if (criterio.getValue().equals("ID del Propietario")) {
+            try{
+                int propietario = Integer.parseInt(parametro.getText());
+                resultado = VDB.buscarViviendaPorIDPropietario(propietario);
+            } catch (Exception e) {
+                mensajeOperacion = "El ID debe ser numérico";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+        }else if (criterio.getValue().equals("ID del Edificio")) {
+            try{
+                int edificio = Integer.parseInt(parametro.getText());
+                resultado = VDB.buscarViviendaPorIDEdificio(edificio);
+            } catch (Exception e) {
+                mensajeOperacion = "El ID debe ser numérico";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+        }else if (criterio.getValue().equals("Nombre del Edificio")) {
+            try{
+                String edificio = parametro.getText();
+                resultado = VDB.buscarViviendaPorNombreEdificio(edificio);
+            } catch (Exception e) {
+                mensajeOperacion = "El ID debe ser de tipo String";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+        } else if (criterio.getValue().equals("Número de Piso")) {
+            try{
+                int piso = Integer.parseInt(parametro.getText());
+                resultado = VDB.buscarViviendaPorNumeroPiso(piso);
+            } catch (Exception e) {
+                mensajeOperacion = "El número de piso debe ser de tipo int";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+        }else if (criterio.getValue().equals("Metros Cuadrados constuidos")) {
+            try{
+                float cuadrado = Float.parseFloat(parametro.getText());
+                resultado = VDB.buscarViviendaPorMtsCuadrados(cuadrado);
+            } catch (Exception e) {
+                mensajeOperacion = "Los metros cuadrados deben ser de tipo flotante";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+        }
+        else if (criterio.getValue().equals("Número Exterior")) {
+            try{
+                int numExt = Integer.parseInt(parametro.getText());
+                resultado = VDB.buscarViviendaPorNumExt(numExt);
+            } catch (Exception e) {
+                mensajeOperacion = "El número exterior debe ser de tipo int";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+        }else if (criterio.getValue().equals("Número Interior")) {
+            try{
+                int numInt = Integer.parseInt(parametro.getText());
+                resultado = VDB.buscarViviendaPorNumInt(numInt);
+            } catch (Exception e) {
+                mensajeOperacion = "El número interior debe ser de tipo flotante";
                 out_infoOperacion.setFill(colorAdvertencia);
                 out_infoOperacion.setText(mensajeOperacion);
                 return;
@@ -220,9 +325,8 @@ public class ViviendaController {
             return;
         }
 
-
-
-        if (habitantes.getText().isBlank() || num_ext.getText().isBlank() || num_int.getText().isBlank() || mts_cuadrados.getText().isBlank()) {
+        if (habitantes.getText().isBlank() || num_ext.getText().isBlank() ||
+                num_int.getText().isBlank() || mts_cuadrados.getText().isBlank()) {
             mensajeOperacion = "Debe llenar todos los campos";
             out_infoOperacion.setFill(colorAdvertencia);
             out_infoOperacion.setText(mensajeOperacion);
@@ -234,10 +338,18 @@ public class ViviendaController {
         int numExt = Integer.parseInt(num_ext.getText());
         int numInt = Integer.parseInt(num_int.getText());
         float metros = Float.parseFloat(mts_cuadrados.getText());
-        int idPropietario = propietario.getValue().getIdPersona();
-        int idEdificio = edificio.getValue().getIdEdificio();
-        int numPiso = Integer.parseInt(piso.getText());
 
+        // Validar propietario
+        PersonaBD duenio = propietario.getValue();
+        if (duenio == null) {
+            mensajeOperacion = "Debe seleccionar un propietario";
+            out_infoOperacion.setFill(colorAdvertencia);
+            out_infoOperacion.setText(mensajeOperacion);
+            return;
+        }
+        int idPropietario = duenio.getIdPersona();
+
+        // Validar calle
         CalleBD calleSeleccionada = calle.getValue();
         if (calleSeleccionada == null) {
             mensajeOperacion = "Debe seleccionar una calle";
@@ -247,18 +359,60 @@ public class ViviendaController {
         }
         int idCalle = calleSeleccionada.getId_calle();
 
-        boolean viviendaActualizada = VDB.actualizarVivienda(seleccionada.getId_vivienda(), tipo, numHab, numExt, numInt, idCalle, metros);
-        boolean propietarioActualizado = PRDB.actualizarPropietario(seleccionada.getId_vivienda(), idPropietario);
-        boolean departamentoActualizado = true;
+        // Validar edificio y piso solo si es departamento
+        int idEdificio = -1;
+        int numPiso = 0;
 
-        if("Departamento".equals(tipo)){
+
+        if ("Departamento".equals(tipo)) {
+            EdificioBD edificioSeleccionado = edificio.getValue();
+            if (edificioSeleccionado == null) {
+                mensajeOperacion = "Debe seleccionar un edificio";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+            idEdificio = edificioSeleccionado.getIdEdificio();
+
+            if (piso.getText().isBlank()) {
+                mensajeOperacion = "Debe indicar el piso";
+                out_infoOperacion.setFill(colorAdvertencia);
+                out_infoOperacion.setText(mensajeOperacion);
+                return;
+            }
+            numPiso = Integer.parseInt(piso.getText());
+        }
+
+        // Actualizar vivienda
+        // Actualizar vivienda
+        boolean actualizado = VDB.actualizarVivienda(seleccionada.getId_vivienda(), tipo, numHab, numExt, numInt, idCalle, metros);
+
+// Verificar si la vivienda ya tiene propietario
+        PropietarioBD duenioExistente = PRDB.buscarPropietarioID(seleccionada.getId_vivienda());
+        boolean propietarioActualizado;
+
+        if (duenioExistente != null) {
+            // Ya existe propietario → actualizar
+            propietarioActualizado = PRDB.actualizarPropietario(seleccionada.getId_vivienda(), idPropietario);
+        } else {
+            // No existe propietario → insertar nuevo
+            propietarioActualizado = PRDB.insertarPropietario(seleccionada.getId_vivienda(), idPropietario) != -1;
+        }
+
+// Actualizar departamento si aplica
+        boolean departamentoActualizado = true;
+        if ("Departamento".equals(tipo)) {
             DepartamentoBD dep = DDB.buscarDepartamentoVivienda(seleccionada.getId_vivienda());
-            if(dep != null) {
+            if (dep != null) {
                 departamentoActualizado = DDB.actualizarDepartamento(dep.getId_departamento(), idEdificio, seleccionada.getId_vivienda(), numPiso);
+            } else {
+                // Si no existía departamento, crear uno nuevo
+                departamentoActualizado = DDB.insertarDepartamento(idEdificio, seleccionada.getId_vivienda(), numPiso) != -1;
             }
         }
 
-        if (viviendaActualizada && propietarioActualizado && departamentoActualizado) {
+// Resultado final
+        if (actualizado && propietarioActualizado && departamentoActualizado) {
             mensajeOperacion = "Vivienda actualizada correctamente";
             out_infoOperacion.setFill(colorExito);
             buscar_vivienda(null);
@@ -267,7 +421,9 @@ public class ViviendaController {
             out_infoOperacion.setFill(colorAdvertencia);
         }
         out_infoOperacion.setText(mensajeOperacion);
+
     }
+
 
 
 
@@ -319,12 +475,13 @@ public class ViviendaController {
             piso.setDisable(!esDepto);
         });
 
-        criterio.getItems().addAll("ID");
+        criterio.getItems().addAll("ID de la Vivienda", "ID de Calle", "Nombre de la Calle", "ID del Propietario", "Nombre del Propietario", "ID del Edificio", "Nombre del Edificio", "Número de Piso", "Metros Cuadrados constuidos", "Número Exterior", "Número Interior");
         configurarTablaBusqueda();
 
 
         tabla_vivienda.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
+            limpiar();
+            if (event.getClickCount()==1) {
                 ViviendaBD seleccionada = tabla_vivienda.getSelectionModel().getSelectedItem();
 
                 if (seleccionada != null) {
@@ -388,16 +545,26 @@ public class ViviendaController {
     }
 
     private void llenarCamposRelacionados(int idVivienda) {
-
         PropietarioBD duenio = PRDB.buscarPropietarioID(idVivienda);
         if (duenio != null) {
-
             PersonaBD persona = PDB.buscarPersonaID(duenio.getId_persona());
             if (persona != null) {
-                propietario.setValue(persona);
+                // Buscar en la lista por ID
+                PersonaBD existente = null;
+                for (PersonaBD p : propietario.getItems()) {
+                    if (p.getIdPersona() == persona.getIdPersona()) {
+                        existente = p;
+                        break;
+                    }
+                }
+                if (existente != null) {
+                    propietario.setValue(existente);
+                } else {
+                    propietario.getItems().add(persona);
+                    propietario.setValue(persona);
+                }
             }
         }
-
 
         if ("Departamento".equals(vivienda.getValue())) {
             DepartamentoBD departamento = DDB.buscarDepartamentoVivienda(idVivienda);
@@ -410,5 +577,17 @@ public class ViviendaController {
     }
 
 
+
+    public void limpiar(){
+        vivienda.setValue(null);
+        edificio.setValue(null);
+        habitantes.setText("");
+        num_ext.setText("");
+        num_int.setText("");
+        mts_cuadrados.setText("");
+        propietario.setValue(null);
+        calle.setValue(null);
+        piso.setText("");
+    }
 
 }
