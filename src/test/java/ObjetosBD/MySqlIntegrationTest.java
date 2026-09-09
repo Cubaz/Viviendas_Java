@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @EnabledIfSystemProperty(named="viviendas.test.mysql",matches="true")
 class MySqlIntegrationTest {
     static final String[] TABLES={"colonia","familia","edificio","calle","persona","vivienda","departamento","propietario","habitantes"};
-    static final String[] TRIGGERS={"bloquear_borrado_colonia","bloquear_borrado_calle","bloquear_borrado_familia","bloquear_borrado_persona","bloquear_borrado_edificio","bloquear_borrado_vivienda"};
+    static final String[] TRIGGERS={"bloquear_borrado_colonia","bloquear_borrado_familia","bloquear_borrado_persona","bloquear_borrado_edificio","bloquear_borrado_vivienda"};
     static String database, originalUrl;
     static Connection admin;
     int colonia, calle, familia, persona, edificio;
@@ -122,7 +122,7 @@ class MySqlIntegrationTest {
         assertFalse(calles.buscarCalleaNombre("Nueva").isEmpty());
         assertFalse(familias.buscarFamiliaApellidos("Nuevo").isEmpty());
         assertFalse(colonias.buscarColoniaNombre("Centro").isEmpty());
-        assertThrows(DataAccessException.class, () -> calles.eliminarCalle(exact));
+        assertTrue(calles.eliminarCalle(exact));
         assertThrows(DataAccessException.class, () -> familias.eliminarFamilia(exact));
         assertThrows(DataAccessException.class, () -> colonias.eliminarColonia(exact));
     }

@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Impedir en MySQL la eliminación de colonia, calle, familia, persona, edificio y vivienda, aun cuando no tengan relaciones hijas.
+**Goal:** Impedir en MySQL la eliminación de colonia, familia, persona, edificio y vivienda, aun cuando no tengan relaciones hijas, y permitir borrar calle cuando no tenga viviendas.
 
-**Architecture:** Una migración SQL instala seis disparadores `BEFORE DELETE` que emiten SQLSTATE `45000`. Las claves foráneas existentes siguen como segunda barrera para relaciones. `DataAccessException` convierte el error del disparador en un mensaje legible para JavaFX.
+**Architecture:** Una migración SQL instala cinco disparadores `BEFORE DELETE` que emiten SQLSTATE `45000`. La clave foránea de vivienda sigue protegiendo calle. `DataAccessException` convierte el error del disparador en un mensaje legible para JavaFX.
 
 **Tech Stack:** MySQL 8, JDBC, Java 25, JavaFX, JUnit 5.
 
@@ -34,7 +34,7 @@ Expected: falla porque aún no existe la migración que instala los disparadores
 
 - [x] **Step 3: Crear la migración SQL**
 
-Crear seis `CREATE TRIGGER ... BEFORE DELETE` que emitan:
+Crear cinco `CREATE TRIGGER ... BEFORE DELETE` que emitan:
 
 ```sql
 SIGNAL SQLSTATE '45000'
@@ -72,7 +72,7 @@ Añadir en `DataAccessException` el caso `causa.getErrorCode() == 1644` con el t
 
 - [x] **Step 4: Aplicar la migración a la base `viviendas`**
 
-Ejecutar el recurso SQL en el contenedor local de MySQL y consultar `information_schema.TRIGGERS` para verificar las seis reglas instaladas.
+Ejecutar el recurso SQL en el contenedor local de MySQL y consultar `information_schema.TRIGGERS` para verificar las cinco reglas instaladas.
 
 - [x] **Step 5: Ejecutar la suite completa**
 

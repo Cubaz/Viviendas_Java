@@ -11,7 +11,7 @@ motivo sin borrar datos.
 | Registro eliminado | Comportamiento |
 | --- | --- |
 | Colonia | Siempre se bloquea. |
-| Calle | Siempre se bloquea. |
+| Calle | Se puede eliminar si no tiene viviendas. |
 | Vivienda | Siempre se bloquea. |
 | Edificio | Siempre se bloquea. |
 | Familia | Siempre se bloquea. |
@@ -20,10 +20,12 @@ motivo sin borrar datos.
 
 ## Diseño
 
-Una migración de MySQL instalará un disparador `BEFORE DELETE` para cada tabla
-superior. El disparador devolverá el error controlado `45000`, incluso si la
-fila no tiene hijos. Las claves foráneas existentes seguirán protegiendo la
-integridad ante operaciones externas.
+Una migración de MySQL instalará un disparador `BEFORE DELETE` para colonia,
+familia, persona, edificio y vivienda. El disparador devolverá el error
+controlado `45000`, incluso si la fila no tiene hijos. La calle se conserva como
+relación hija de colonia y se puede eliminar cuando no tiene viviendas. Las
+claves foráneas existentes seguirán protegiendo la integridad ante operaciones
+externas.
 
 La capa de interfaz traducirá tanto el error de relación foránea como el error
 del disparador a un mensaje claro. La eliminación de propietario, departamento
