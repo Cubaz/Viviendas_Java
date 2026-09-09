@@ -2,37 +2,34 @@
 
 ## Objetivo
 
-Impedir siempre la eliminación de los registros superiores de la base
-`viviendas`, tengan o no relaciones hijas. La aplicación debe informar el
-motivo sin borrar datos.
+Permitir eliminar cualquier registro de la base `viviendas` cuando no tenga
+relaciones hijas. La aplicación debe informar el motivo cuando MySQL proteja
+una relación existente.
 
 ## Reglas aprobadas
 
 | Registro eliminado | Comportamiento |
 | --- | --- |
-| Colonia | Siempre se bloquea. |
+| Colonia | Se puede eliminar si no tiene calles. |
 | Calle | Se puede eliminar si no tiene viviendas. |
-| Vivienda | Siempre se bloquea. |
-| Edificio | Siempre se bloquea. |
-| Familia | Siempre se bloquea. |
+| Vivienda | Se puede eliminar si no tiene departamento, propietarios ni habitantes. |
+| Edificio | Se puede eliminar si no tiene departamentos. |
+| Familia | Se puede eliminar si no tiene personas. |
 | Persona | Se puede eliminar si no es propietario ni habitante. |
 | Departamento, propietario y habitante | Se pueden eliminar individualmente; son relaciones hijas. |
 
 ## Diseño
 
-Una migración de MySQL instalará un disparador `BEFORE DELETE` para colonia,
-familia, edificio y vivienda. El disparador devolverá el error controlado
-`45000`, incluso si la fila no tiene hijos. Calle y persona se conservan como
-relaciones hijas: calle se puede eliminar cuando no tiene viviendas y persona
-cuando no es propietario ni habitante. Las claves foráneas existentes seguirán
-protegiendo la integridad ante operaciones externas.
+La migración elimina los disparadores de bloqueo creados anteriormente. Las
+claves foráneas restrictivas de MySQL son la única regla de borrado: permiten
+eliminar una fila sin hijos e impiden hacerlo cuando sí existen dependencias.
 
-La capa de interfaz traducirá tanto el error de relación foránea como el error
-del disparador a un mensaje claro. La eliminación de propietario, departamento
-y habitante no cambia: son relaciones menores que pueden retirarse por separado.
+La interfaz traduce el error de relación foránea a un mensaje claro. La
+eliminación de propietario, departamento y habitante no cambia: son relaciones
+menores que pueden retirarse por separado.
 
 ## Verificación
 
 Las pruebas crearán una base temporal con el mismo esquema, aplicarán la
-migración y comprobarán que cada padre se mantiene al intentar borrarlo con o
-sin hijos. También comprobarán que las relaciones hijas continúan eliminándose.
+migración y comprobarán que los padres se mantienen al intentar borrarlos con
+hijos, pero se pueden eliminar después de retirar las relaciones hijas.

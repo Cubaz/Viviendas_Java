@@ -15,10 +15,6 @@ class ErroresYConexionTest {
   assertEquals("Eliminar: No se puede eliminar porque tiene datos relacionados. Elimine primero las relaciones hijas.",
    ErroresUI.mensaje(new DataAccessException("Eliminar",new SQLException("sql", "23000",1451))));
  }
- @Test void padreProtegidoMuestraComoEliminarSoloRelacionesHijas() {
-  assertEquals("Eliminar: No se permite eliminar registros superiores. Elimine únicamente relaciones hijas.",
-   ErroresUI.mensaje(new DataAccessException("Eliminar",new SQLException("sql", "45000",1644))));
- }
  @Test void conexionFallidaNoCierraLaAplicacion() throws Exception {
   String anterior=System.getProperty("viviendas.db.url");
   System.setProperty("viviendas.db.url","jdbc:driver-inexistente:test");
