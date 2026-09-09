@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @EnabledIfSystemProperty(named="viviendas.test.mysql",matches="true")
 class MySqlIntegrationTest {
     static final String[] TABLES={"colonia","familia","edificio","calle","persona","vivienda","departamento","propietario","habitantes"};
-    static final String[] TRIGGERS={"bloquear_borrado_colonia","bloquear_borrado_familia","bloquear_borrado_persona","bloquear_borrado_edificio","bloquear_borrado_vivienda"};
+    static final String[] TRIGGERS={"bloquear_borrado_colonia","bloquear_borrado_familia","bloquear_borrado_edificio","bloquear_borrado_vivienda"};
     static String database, originalUrl;
     static Connection admin;
     int colonia, calle, familia, persona, edificio;
@@ -211,7 +211,7 @@ class MySqlIntegrationTest {
         assertTrue(new JDPropietario().eliminarPropietario(vivienda, persona));
         assertTrue(new JDDepartamento().eliminarDepartamento(departamento.getId_departamento()));
         assertThrows(DataAccessException.class, () -> service.eliminar(vivienda));
-        assertThrows(DataAccessException.class, () -> personas.eliminarPersona(persona));
+        assertTrue(personas.eliminarPersona(persona));
         assertThrows(DataAccessException.class, () -> calles.eliminarCalle(calle));
         assertThrows(DataAccessException.class, () -> edificios.eliminarEdificio(edificio));
         assertThrows(DataAccessException.class, () -> familias.eliminarFamilia(familia));
@@ -240,7 +240,7 @@ class MySqlIntegrationTest {
         assertTrue(owner.actualizarPropietario(id,otro));assertEquals(otro,owner.buscarPropietarioID(id).getId_persona());
         assertTrue(owner.eliminarPropietario(id,otro));assertTrue(d.eliminarDepartamento(dep));
         assertThrows(DataAccessException.class, () -> new JDVivienda().eliminarVivienda(id));
-        assertThrows(DataAccessException.class, () -> p.eliminarPersona(otro));
+        assertTrue(p.eliminarPersona(otro));
         assertThrows(DataAccessException.class, () -> e.eliminarEdificio(edificio));
     }
 

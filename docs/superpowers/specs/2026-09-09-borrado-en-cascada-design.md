@@ -15,17 +15,17 @@ motivo sin borrar datos.
 | Vivienda | Siempre se bloquea. |
 | Edificio | Siempre se bloquea. |
 | Familia | Siempre se bloquea. |
-| Persona | Siempre se bloquea. |
+| Persona | Se puede eliminar si no es propietario ni habitante. |
 | Departamento, propietario y habitante | Se pueden eliminar individualmente; son relaciones hijas. |
 
 ## Diseño
 
 Una migración de MySQL instalará un disparador `BEFORE DELETE` para colonia,
-familia, persona, edificio y vivienda. El disparador devolverá el error
-controlado `45000`, incluso si la fila no tiene hijos. La calle se conserva como
-relación hija de colonia y se puede eliminar cuando no tiene viviendas. Las
-claves foráneas existentes seguirán protegiendo la integridad ante operaciones
-externas.
+familia, edificio y vivienda. El disparador devolverá el error controlado
+`45000`, incluso si la fila no tiene hijos. Calle y persona se conservan como
+relaciones hijas: calle se puede eliminar cuando no tiene viviendas y persona
+cuando no es propietario ni habitante. Las claves foráneas existentes seguirán
+protegiendo la integridad ante operaciones externas.
 
 La capa de interfaz traducirá tanto el error de relación foránea como el error
 del disparador a un mensaje claro. La eliminación de propietario, departamento

@@ -6,10 +6,6 @@ DROP TRIGGER IF EXISTS bloquear_borrado_familia;
 CREATE TRIGGER bloquear_borrado_familia BEFORE DELETE ON familia
 FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se permite eliminar registros superiores';
 
-DROP TRIGGER IF EXISTS bloquear_borrado_persona;
-CREATE TRIGGER bloquear_borrado_persona BEFORE DELETE ON persona
-FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se permite eliminar registros superiores';
-
 DROP TRIGGER IF EXISTS bloquear_borrado_edificio;
 CREATE TRIGGER bloquear_borrado_edificio BEFORE DELETE ON edificio
 FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se permite eliminar registros superiores';
